@@ -32,9 +32,9 @@ class BookService(metaclass=Singleton):
                       size: int,
                       order_by: str,
                       order: int,
-                      name=str,
-                      code=str,
-                      author=str
+                      name:str,
+                      code:str,
+                      author:str
                       ):
         try:
             filter_condition = self.build_filter_condition(name=name, code=code, author=author)

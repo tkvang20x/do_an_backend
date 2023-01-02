@@ -42,8 +42,7 @@ class ResponseCommon:
         """
 
     def __init__(self):
-        self.common_message = {"client_message_id": str(uuid.uuid4()),
-                               "data": None,
+        self.common_message = {"data": None,
                                "status": None,
                                "error": None,
                                "path": None}
@@ -102,8 +101,7 @@ class ResponseException:
     def response(self, status: int,
                  error_message: str,
                  path: str):
-        error_content = {"client_message_id": str(uuid.uuid4()),
-                         "data": None,
+        error_content = {"data": None,
                          "status": status,
                          "error": error_message,
                          "path": path,}

@@ -56,13 +56,13 @@ class BookRepository(MongoBaseRepo):
                 list_ocr_engine = [self._dict_to_list_book_result(book) for book in
                                    list_book_result_dict]
 
-                # count total
-                total = self.book_collection.count_documents(filter_condition)
-                # calculate total page
-                if not total or total == 0:
-                    total_page = 0
-                else:
-                    total_page = ((total + size - 1) // size)
+            # count total
+            total = self.book_collection.count_documents(filter_condition)
+            # calculate total page
+            if not total or total == 0:
+                total_page = 0
+            else:
+                total_page = ((total + size - 1) // size)
             result_pagnition = base_model.coor_response(response_data=list_ocr_engine,
                                                         page=page,
                                                         limit=size,

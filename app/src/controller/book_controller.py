@@ -5,7 +5,7 @@ from fastapi.security import HTTPBearer
 from app.src.base.base_model import ResponseCommon
 from app.src.base.base_service import BaseRoute
 from app.src.model.book_model import CreateDataBook, UpdateBookData
-from app.src.service.book_serevice import BookService
+from app.src.service.book_service import BookService
 from app.src.base.base_exception import gen_exception_service, BusinessException
 from app.src.ultities.token_utils import validate_token
 

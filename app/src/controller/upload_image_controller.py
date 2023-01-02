@@ -28,10 +28,10 @@ async def create_upload_file(file: UploadFile = File(...)):
     image.save(path + "\\" + file.filename)
 
     path_result = path + "\\" + file.filename
-    path_result = path_result.replace("\\" , "/")
+    path_result = path_result.replace("\\", "/")
     data = StreamingResponse(io.BytesIO(contents), media_type="image/png")
 
-    return {"path" : path_result}
+    return {"path": path_result}
 
 
 @router.get("/images")
