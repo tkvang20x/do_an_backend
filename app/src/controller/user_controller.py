@@ -1,8 +1,11 @@
+import os
 import types
 
 from fastapi import APIRouter, Request, Query, UploadFile, File
 from starlette import status
+from starlette.staticfiles import StaticFiles
 
+from app.src.base.base_api import app
 from app.src.base.base_exception import gen_exception_service, BusinessException
 from app.src.base.base_model import ResponseCommon
 from app.src.base.base_service import BaseRoute
@@ -14,7 +17,8 @@ router = APIRouter(
 )
 
 user_service = UserService()
-
+BASEDIR = os.path.dirname(__file__)
+app.mount("/storage", StaticFiles(directory=BASEDIR + "/storage"), name="storage")
 
 @router.get(path="/users", response_description="Get list user")
 def get_list_users(request: Request,
@@ -91,7 +95,7 @@ def delete_user(request: Request, code: str):
 @router.put(path="/users/{code}/avatar", response_description="Update avatar user")
 async def update_user(request: Request, code: str, avatar: UploadFile = File(...)):
     try:
-        response = await user_service.update_avatar_user_service(code=code, avatar=avatar)
+        response = await user_service.update_avatar_user_service(code=code, avatar=avatar, path_folder=BASEDIR)
         return ResponseCommon().data(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)

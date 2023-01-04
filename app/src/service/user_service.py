@@ -86,11 +86,11 @@ class UserService(metaclass=Singleton):
             raise BusinessException(message=error_message, http_code=http_status)
 
     @types.coroutine
-    def update_avatar_user_service(self, code: str, avatar: UploadFile = File(...)):
+    def update_avatar_user_service(self, code: str,path_folder: str, avatar: UploadFile = File(...)):
         try:
             self.get_detail_user_service(code=code.strip())
 
-            path_avatar = yield from image_utils.create_upload_file(avatar)
+            path_avatar = yield from image_utils.create_upload_file(path_folder,avatar)
             update_avatar_data = self.user_repo.update_avatar_user_repo(code=code, path_avatar=path_avatar)
             return update_avatar_data
         except Exception as e:

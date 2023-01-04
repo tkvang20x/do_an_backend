@@ -88,6 +88,14 @@ class UserRepository(MongoBaseRepo):
         user_result_dict = self._dict_to_create_user_result(user_result)
         return user_result_dict
 
+    def check_user_name_user(self, user_name: str):
+        user_name = user_name.strip()
+        user_result = self.user_collection.find_one({"user_name": user_name, 'is_active': True})
+        if not user_result:
+            return False
+        user_result_dict = self._dict_to_create_user_result(user_result)
+        return True
+
     def update_user_repo(self, code: str, data_update: UpdateUser):
         data_update = data_update.dict()
         data_update['modified_time'] = datetime_utils.get_string_datetime_now()
