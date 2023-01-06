@@ -12,6 +12,7 @@ REGEX_STRING = '^(?!.*[^>]+>).*'
 
 class CustomBaseModel(BaseModel):
     is_active: Optional[bool] = Field(default=True)
+    is_delete: Optional[bool] = Field(default=False)
     created_by: Optional[str] = Field(default="")
     created_time: Optional[str] = Field(default=datetime_utils.get_string_datetime_now())
     modified_time: Optional[str] = Field(default="")
