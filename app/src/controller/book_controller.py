@@ -20,9 +20,10 @@ router = APIRouter(
 book_service = BookService()
 BASEDIR = os.path.dirname(__file__)
 app.mount("/storage", StaticFiles(directory=BASEDIR + "/storage"), name="storage")
+app.mount("/qrcode", StaticFiles(directory=BASEDIR + "/qrcode"), name="qrcode")
 
 
-@router.get(path="/book/{code_books}", response_description="Get list book")
+@router.get(path="/book/{code_books}/list", response_description="Get list book")
 def get_list_book(request: Request,
                   code_books: str,
                   page: int = 1,
@@ -50,28 +51,28 @@ def get_list_book(request: Request,
                                 message=f"Get list books. - Caused by: [{error_message}]")
 
 
-# @router.post(path="/book/create", response_description="Create new book")
-# def create_book(request: Request, data: CreateBook):
-#     try:
-#         response = book_service.create_book_service(data_create=data)
-#         return ResponseCommon().success(result=response, status=status.HTTP_201_CREATED, path=request.url.path)
-#     except Exception as ex:
-#         http_status, error_message = gen_exception_service(ex)
-#         raise BusinessException(http_code=http_status,
-#                                 path=request.url.path,
-#                                 message=f"Create new book error. - Caused by: [{error_message}]")
+@router.post(path="/book/create", response_description="Create new book")
+def create_book(request: Request, code_books: str, amount: int):
+    try:
+        response = book_service.create_book_by_code_service(code_books=code_books, amount=amount, path_folder=BASEDIR)
+        return ResponseCommon().success(result=response, status=status.HTTP_201_CREATED, path=request.url.path)
+    except Exception as ex:
+        http_status, error_message = gen_exception_service(ex)
+        raise BusinessException(http_code=http_status,
+                                path=request.url.path,
+                                message=f"Create new book error. - Caused by: [{error_message}]")
 
 
-# @router.get(path="/books/{code}", response_description="Get detail book")
-# def get_detail_book(request: Request, code: str):
-#     try:
-#         response = books_service.get_detail_book_service(code=code)
-#         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
-#     except Exception as ex:
-#         http_status, error_message = gen_exception_service(ex)
-#         raise BusinessException(http_code=http_status,
-#                                 path=request.url.path,
-#                                 message=f"Get detail book error. - Caused by: [{error_message}]")
+@router.get(path="/book/{code_id}", response_description="Get detail book by code id")
+def get_detail_book(request: Request, code_id: str):
+    try:
+        response = book_service.get_detail_book_service(code_id=code_id)
+        return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
+    except Exception as ex:
+        http_status, error_message = gen_exception_service(ex)
+        raise BusinessException(http_code=http_status,
+                                path=request.url.path,
+                                message=f"Get detail book error. - Caused by: [{error_message}]")
 #
 #
 # @router.put(path="/books/{code}", response_description="Update book")

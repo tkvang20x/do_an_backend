@@ -3,9 +3,13 @@ import logging
 from app.src.base.base_repository import MongoBaseRepo
 from app.src.model.base import base_model
 from app.src.model.books_model import CreateDataBook, DetailBooks, ListBook, UpdateBookData
+from app.src.repository.book_repository import BookRepository
 from app.src.ultities import mongo_utils, collection_utils, datetime_utils
 
 BOOKS_COLLECTION = "books"
+
+SYNTAS_LOOKUP = "$lookup"
+SYNTAS_MATCH = "$match"
 
 
 class BooksRepository(MongoBaseRepo):
@@ -13,6 +17,7 @@ class BooksRepository(MongoBaseRepo):
         super(BooksRepository, self).__init__(BOOKS_COLLECTION)
         self.books_collection = self.collection
         self._record_status_active = {'is_active': True}
+        self.book_repository = BookRepository()
 
     def create_book_repo(self, data: DetailBooks):
         try:
@@ -76,9 +81,10 @@ class BooksRepository(MongoBaseRepo):
             logging.error(f"Get List OCR Engine error -- Caused by '{e.__str__()}")
             return None
 
-    def _dict_to_list_book_result(self, dict_book):
+    def _dict_to_list_book_result(self, dict_book: dict):
         dict_object_id = mongo_utils.convert_object_id_to_string(dict_book)
         result = ListBook(**dict_object_id)
+        result.total_books = self.book_repository.get_all_book_repo(result.code)
         return result
 
     def get_detail_book_repo(self, code: str):

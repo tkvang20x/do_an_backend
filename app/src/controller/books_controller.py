@@ -20,26 +20,27 @@ router = APIRouter(
 books_service = BooksService()
 BASEDIR = os.path.dirname(__file__)
 app.mount("/storage", StaticFiles(directory=BASEDIR + "/storage"), name="storage")
+app.mount("/qrcode", StaticFiles(directory=BASEDIR + "/qrcode"), name="qrcode")
 
 
-@router.get(path="/books", response_description="Get list book")
+@router.get(path="/books", response_description="Get list books")
 def get_list_books(request: Request,
-                  page: int = 1,
-                  size: int = 10,
-                  order_by: str = Query(default="modified_time",
-                                        enum=["modified_time", "created_time"]),
-                  order: int = Query(default=-1, enum=[-1, 1]),
-                  name: str = None,
-                  code: str = None,
-                  author: str = None):
+                   page: int = 1,
+                   size: int = 10,
+                   order_by: str = Query(default="modified_time",
+                                         enum=["modified_time", "created_time"]),
+                   order: int = Query(default=-1, enum=[-1, 1]),
+                   name: str = None,
+                   code: str = None,
+                   author: str = None):
     try:
         response = books_service.get_list_books(page=page,
-                                               size=size,
-                                               order_by=order_by,
-                                               order=order,
-                                               name=name,
-                                               code=code,
-                                               author=author)
+                                                size=size,
+                                                order_by=order_by,
+                                                order=order,
+                                                name=name,
+                                                code=code,
+                                                author=author)
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)
@@ -48,10 +49,10 @@ def get_list_books(request: Request,
                                 message=f"Get list books. - Caused by: [{error_message}]")
 
 
-@router.post(path="/books", response_description="Create new book")
+@router.post(path="/books", response_description="Create new books")
 def create_books(request: Request, data: CreateDataBook):
     try:
-        response = books_service.create_books_service(data_create=data)
+        response = books_service.create_books_service(data_create=data, path_folder=BASEDIR)
         return ResponseCommon().success(result=response, status=status.HTTP_201_CREATED, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)
@@ -60,7 +61,7 @@ def create_books(request: Request, data: CreateDataBook):
                                 message=f"Create new book error. - Caused by: [{error_message}]")
 
 
-@router.get(path="/books/{code}", response_description="Get detail book")
+@router.get(path="/books/{code}", response_description="Get detail books")
 def get_detail_books(request: Request, code: str):
     try:
         response = books_service.get_detail_books_service(code=code)
@@ -72,7 +73,7 @@ def get_detail_books(request: Request, code: str):
                                 message=f"Get detail book error. - Caused by: [{error_message}]")
 
 
-@router.put(path="/books/{code}", response_description="Update book")
+@router.put(path="/books/{code}", response_description="Update books")
 def update_books(request: Request, code: str, data_update: UpdateBookData = Body()):
     try:
         response = books_service.update_books_service(code=code, data_update=data_update)
@@ -84,7 +85,7 @@ def update_books(request: Request, code: str, data_update: UpdateBookData = Body
                                 message=f"Update book error. - Caused by: [{error_message}]")
 
 
-@router.delete(path="/books/{code}", response_description="Delete book")
+@router.delete(path="/books/{code}", response_description="Delete books")
 def delete_books(request: Request, code: str):
     try:
         response = books_service.delete_books_service(code=code)

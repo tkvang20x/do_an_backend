@@ -16,8 +16,9 @@ class BooksService(metaclass=Singleton):
         self.books_repo = BooksRepository()
         self.book_repo = BookService()
 
-    def create_books_service(self, data_create: CreateDataBook, user: str = ""):
+    def create_books_service(self, data_create: CreateDataBook,path_folder: str, user: str = ""):
         try:
+            amount = data_create.amount
             data_create_dict = data_create.dict()
             data_create = DetailBooks(**data_create_dict)
             data_create.modified_time = datetime_utils.get_string_datetime_now()
@@ -28,9 +29,9 @@ class BooksService(metaclass=Singleton):
             if not create_book_result:
                 raise RuntimeError(f'Create new Engine error!')
 
-            if data_create.amount > 0:
-                for i in range(data_create.amount):
-                    self.book_repo.create_book_service(code_book=data_create.code)
+            if amount > 0:
+                for i in range(amount):
+                    self.book_repo.create_book_service(code_books=data_create.code, path_folder=path_folder)
 
             return create_book_result
         except Exception as ex:
