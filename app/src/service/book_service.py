@@ -4,7 +4,7 @@ from starlette import status
 
 from app.src.base.base_exception import BusinessException, gen_exception_service
 from app.src.base.base_service import Singleton
-from app.src.model.book_model import CreateBook, DetailBook
+from app.src.model.book_model import CreateBook, DetailBook, UpdateBook
 from app.src.repository.book_repository import BookRepository
 from app.src.repository.books_repository import BooksRepository
 from app.src.ultities import string_utils, mongo_utils, datetime_utils, const_utils, image_utils
@@ -110,6 +110,27 @@ class BookService(metaclass=Singleton):
                 raise BusinessException(message=f'Book by code [{code_id}] not exist!',
                                         http_code=status.HTTP_404_NOT_FOUND)
             return book_data
+        except Exception as e:
+            http_status, error_message = gen_exception_service(e)
+            raise BusinessException(message=error_message, http_code=http_status)
+
+    def update_book_service(self, code_id: str, data_update: UpdateBook):
+        try:
+            self.get_detail_book_service(code_id=code_id.strip())
+            update_data = self.book_repo.update_book_repo(code_id=code_id, data_update=data_update)
+            return update_data
+        except Exception as e:
+            http_status, error_message = gen_exception_service(e)
+            raise BusinessException(message=error_message, http_code=http_status)
+
+    def delete_book_service(self, code_id: str):
+        try:
+            self.get_detail_book_service(code_id=code_id.strip())
+            update_data = self.book_repo.delete_book_repo(code_id= code_id)
+            if not update_data:
+                raise BusinessException(message=f'Delete book {code_id} remove fail!',
+                                        http_code=status.HTTP_304_NOT_MODIFIED)
+            return True
         except Exception as e:
             http_status, error_message = gen_exception_service(e)
             raise BusinessException(message=error_message, http_code=http_status)

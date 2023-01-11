@@ -8,7 +8,7 @@ from starlette.staticfiles import StaticFiles
 from app.src.base.base_api import app
 from app.src.base.base_model import ResponseCommon
 from app.src.base.base_service import BaseRoute
-from app.src.model.book_model import CreateBook
+from app.src.model.book_model import CreateBook, UpdateBook
 from app.src.base.base_exception import gen_exception_service, BusinessException
 from app.src.service.book_service import BookService
 from app.src.ultities.token_utils import validate_token
@@ -73,27 +73,27 @@ def get_detail_book(request: Request, code_id: str):
         raise BusinessException(http_code=http_status,
                                 path=request.url.path,
                                 message=f"Get detail book error. - Caused by: [{error_message}]")
-#
-#
-# @router.put(path="/books/{code}", response_description="Update book")
-# def update_book(request: Request, code: str, data_update: UpdateBookData = Body()):
-#     try:
-#         response = books_service.update_book_service(code=code, data_update=data_update)
-#         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
-#     except Exception as ex:
-#         http_status, error_message = gen_exception_service(ex)
-#         raise BusinessException(http_code=http_status,
-#                                 path=request.url.path,
-#                                 message=f"Update book error. - Caused by: [{error_message}]")
-#
-#
-# @router.delete(path="/books/{code}", response_description="Delete book")
-# def delete_book(request: Request, code: str):
-#     try:
-#         response = books_service.delete_book_service(code=code)
-#         return ResponseCommon().data(result=response, status=status.HTTP_204_NO_CONTENT, path=request.url.path)
-#     except Exception as ex:
-#         http_status, error_message = gen_exception_service(ex)
-#         raise BusinessException(http_code=http_status,
-#                                 path=request.url.path,
-#                                 message=f"Delete book error. - Caused by: [{error_message}]")
+
+
+@router.put(path="/book/{code_id}", response_description="Update book")
+def update_book(request: Request, code_id: str, data_update: UpdateBook):
+    try:
+        response = book_service.update_book_service(code_id=code_id, data_update=data_update)
+        return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
+    except Exception as ex:
+        http_status, error_message = gen_exception_service(ex)
+        raise BusinessException(http_code=http_status,
+                                path=request.url.path,
+                                message=f"Update book error. - Caused by: [{error_message}]")
+
+
+@router.delete(path="/book/{code_id}", response_description="Delete book")
+def delete_book(request: Request, code_id: str):
+    try:
+        response = book_service.delete_book_service(code_id=code_id)
+        return ResponseCommon().data(result=response, status=status.HTTP_204_NO_CONTENT, path=request.url.path)
+    except Exception as ex:
+        http_status, error_message = gen_exception_service(ex)
+        raise BusinessException(http_code=http_status,
+                                path=request.url.path,
+                                message=f"Delete book error. - Caused by: [{error_message}]")

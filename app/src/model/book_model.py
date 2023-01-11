@@ -29,3 +29,9 @@ class DetailBook(CustomBaseModel):
     status_borrow: Optional[str] = None
     user_borrow: Optional[str] = None
     qr_code_data: Optional[str] = None
+
+
+class UpdateBook(CustomBaseModel):
+    status_book: Optional[str] = None
+    status_borrow: Optional[str] = None
+    user_borrow: Optional[str] = None
