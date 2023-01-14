@@ -16,7 +16,7 @@ class BooksService(metaclass=Singleton):
         self.books_repo = BooksRepository()
         self.book_repo = BookService()
 
-    def create_books_service(self, data_create: CreateDataBook,path_folder: str, user: str = ""):
+    def create_books_service(self, data_create: CreateDataBook, path_folder: str, user: str = ""):
         try:
             amount = data_create.amount
             data_create_dict = data_create.dict()
@@ -39,21 +39,23 @@ class BooksService(metaclass=Singleton):
             raise BusinessException(message=error_message, http_code=http_status)
 
     def get_list_books(self,
-                      page: int,
-                      size: int,
-                      order_by: str,
-                      order: int,
-                      name:str,
-                      code:str,
-                      author:str
-                      ):
+                       page: int,
+                       size: int,
+                       order_by: str,
+                       order: int,
+                       name: str,
+                       code: str,
+                       author: str,
+                       group_code: str
+                       ):
         try:
             filter_condition = self.build_filter_condition(name=name, code=code, author=author)
             list_book = self.books_repo.get_list_book_repo(page=page,
-                                                          size=size,
-                                                          order_by=order_by,
-                                                          order=order,
-                                                          filter_condition=filter_condition)
+                                                           size=size,
+                                                           order_by=order_by,
+                                                           order=order,
+                                                           group_code=group_code,
+                                                           filter_condition=filter_condition)
             return list_book
         except Exception as ex:
             http_status, error_message = gen_exception_service(ex)
@@ -83,7 +85,7 @@ class BooksService(metaclass=Singleton):
     def update_books_service(self, code: str, data_update: UpdateBookData):
         try:
             self.get_detail_books_service(code=code.strip())
-            update_data = self.books_repo.update_book_repo(code= code, data_update= data_update)
+            update_data = self.books_repo.update_book_repo(code=code, data_update=data_update)
             return update_data
         except Exception as e:
             http_status, error_message = gen_exception_service(e)
@@ -92,7 +94,7 @@ class BooksService(metaclass=Singleton):
     def delete_books_service(self, code: str):
         try:
             self.get_detail_books_service(code=code.strip())
-            update_data = self.books_repo.delete_book_repo(code= code)
+            update_data = self.books_repo.delete_book_repo(code=code)
             if not update_data:
                 raise BusinessException(message=f'Delete book {code} remove fail!',
                                         http_code=status.HTTP_304_NOT_MODIFIED)

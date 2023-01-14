@@ -3,6 +3,7 @@ from typing import Optional
 from pydantic import BaseModel
 
 from app.src.model.base.base_model import CustomBaseModel
+from app.src.model.group_books_model import GroupBooks
 
 
 class DetailBooks(CustomBaseModel):
@@ -19,6 +20,7 @@ class DetailBooks(CustomBaseModel):
     avatar: Optional[str] = None
     total_books: Optional[int] = 0
     group_code: Optional[str] = None
+    groups: Optional[GroupBooks] = None
 
 
 class ListBook(CustomBaseModel):
@@ -29,6 +31,7 @@ class ListBook(CustomBaseModel):
     total_books: Optional[int] = None
     group_code: Optional[str] = None
     title: Optional[str] = None
+    groups: Optional[GroupBooks] = None
 
 
 class CreateDataBook(CustomBaseModel):

@@ -2,8 +2,8 @@ import logging
 
 from app.src.base.base_repository import MongoBaseRepo
 from app.src.model.base import base_model
-from app.src.model.group_books_model import GroupBooks
-from app.src.ultities import mongo_utils, collection_utils
+from app.src.model.group_books_model import GroupBooks, GroupBooksUpdate
+from app.src.ultities import mongo_utils, collection_utils, datetime_utils
 
 GROUP_COLLECTION = "groups"
 
@@ -58,3 +58,29 @@ class GroupBooksRepository(MongoBaseRepo):
         except Exception as e:
             logging.error(f"Get Size Book error -- Caused by '{e.__str__()}")
             return None
+
+    def get_detail_group_repo(self, group_code: str):
+        group_code = group_code.strip()
+        group_result = self.group_collection.find_one({"group_code": group_code, 'is_active': True})
+        if not group_result:
+            return None
+        group_result_dict = self._dict_to_group_result(group_result)
+        return group_result_dict
+
+    def update_group_repo(self, group_code: str, data_update: GroupBooksUpdate):
+        data_update = data_update.dict()
+        data_update['modified_time'] = datetime_utils.get_string_datetime_now()
+        group_code = group_code.strip()
+        _update_result = self.group_collection.update_one({'group_code': group_code},
+                                                          {'$set': data_update})
+        if _update_result and _update_result.modified_count == 1:
+            book_result_dict = self.get_detail_group_repo(group_code=group_code)
+            return book_result_dict
+        return None
+
+    def delete_group_repo(self, group_code: str):
+        delete_result = self.group_collection.update_one({'group_code': group_code.strip()},
+                                                         {'$set': {'is_active': False}})
+        if delete_result and delete_result.modified_count == 1:
+            return True
+        return False

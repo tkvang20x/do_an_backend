@@ -32,7 +32,8 @@ def get_list_books(request: Request,
                    order: int = Query(default=-1, enum=[-1, 1]),
                    name: str = None,
                    code: str = None,
-                   author: str = None):
+                   author: str = None,
+                   group_code: str = None):
     try:
         response = books_service.get_list_books(page=page,
                                                 size=size,
@@ -40,7 +41,8 @@ def get_list_books(request: Request,
                                                 order=order,
                                                 name=name,
                                                 code=code,
-                                                author=author)
+                                                author=author,
+                                                group_code=group_code)
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)
