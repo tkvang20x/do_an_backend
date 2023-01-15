@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timedelta
+import time
 
 DATETIME_PATTERN = '%Y-%m-%d-%H:%M:%S'
 
@@ -25,6 +26,10 @@ def get_timestamp_now():
     """
     timestamp = datetime.timestamp(datetime.today())
     return int(timestamp)
+
+
+def get_milisecond_time():
+    return round(time.time() * 1000)
 
 
 def get_duration_second_time(target_time: str):
