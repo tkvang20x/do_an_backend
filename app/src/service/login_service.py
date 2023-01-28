@@ -15,12 +15,12 @@ SECURITY_ALGORITHM = 'HS256'
 SECRET_KEY = '123456'
 
 
-def generate_token(username: Union[str, Any]) -> str:
+def generate_token(username: Union[str, Any], role: Union[str, Any]) -> str:
     expire = datetime.utcnow() + timedelta(
         seconds=60 * 30  # Expired after 3 days
     )
     to_encode = {
-        "exp": expire, "username": username
+        "exp": expire, "username": username, "role": role
     }
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=SECURITY_ALGORITHM)
     return encoded_jwt
@@ -35,5 +35,13 @@ class LoginService(metaclass=Singleton):
         if not check_username:
             raise BusinessException(message=f'User name {data_login.username} not exist!',
                                     http_code=status.HTTP_404_NOT_FOUND)
-        response = generate_token(data_login.username)
+
+        if not data_login.password == check_username.password:
+            raise BusinessException(message=f'PASSWORD INCORRECT !!!',
+                                    http_code=status.HTTP_400_BAD_REQUEST)
+
+        response = generate_token(check_username.user_name, check_username.role)
+        response = {
+            'token': response
+        }
         return response

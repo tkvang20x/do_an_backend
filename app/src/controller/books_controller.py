@@ -33,7 +33,8 @@ def get_list_books(request: Request,
                    name: str = None,
                    code: str = None,
                    author: str = None,
-                   group_code: str = None):
+                   group_code: str = None,
+                   user=Depends(validate_token)):
     try:
         response = books_service.get_list_books(page=page,
                                                 size=size,
@@ -52,8 +53,11 @@ def get_list_books(request: Request,
 
 
 @router.post(path="/books", response_description="Create new books")
-def create_books(request: Request, data: CreateDataBook):
+def create_books(request: Request, data: CreateDataBook, user=Depends(validate_token)):
     try:
+        if user.get('role') == 'USER':
+            raise BusinessException(message=f'User not permission to access resource!',
+                                    http_code=status.HTTP_403_FORBIDDEN)
         response = books_service.create_books_service(data_create=data, path_folder=BASEDIR)
         return ResponseCommon().success(result=response, status=status.HTTP_201_CREATED, path=request.url.path)
     except Exception as ex:

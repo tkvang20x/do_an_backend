@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request, HTTPException
 from starlette import status
 
-from app.src.base.base_exception import BusinessException
+from app.src.base.base_exception import BusinessException, gen_exception_service
 from app.src.base.base_model import ResponseCommon
 from app.src.base.base_service import BaseRoute
 from app.src.model.login_model import LoginRequest
@@ -20,6 +20,7 @@ def login(request: Request, login: LoginRequest):
         response = login_service.login_user(data_login=login)
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
-        raise BusinessException(http_code=400,
+        http_status, error_message = gen_exception_service(ex)
+        raise BusinessException(http_code=http_status,
                                 path=request.url.path,
-                                message=f"LOGIN FAIL- INTERNAL SERVER!")
+                                message=f"LOGIN FAIL- {error_message}!")

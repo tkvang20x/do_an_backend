@@ -15,7 +15,7 @@ reusable_oauth2 = HTTPBearer(
 )
 
 
-def validate_token(http_authorization_credentials=Depends(reusable_oauth2)) -> str:
+def validate_token(http_authorization_credentials=Depends(reusable_oauth2)) -> dict:
     """
     Decode JWT token to get username => return username
     """
@@ -23,7 +23,7 @@ def validate_token(http_authorization_credentials=Depends(reusable_oauth2)) -> s
         payload = jwt.decode(http_authorization_credentials.credentials, SECRET_KEY, algorithms=[SECURITY_ALGORITHM])
         if payload.get('exp') < get_timestamp_now():
             raise HTTPException(status_code=403, detail="Token expired")
-        return payload.get('username')
+        return payload
     except(jwt.PyJWTError, ValidationError):
         raise HTTPException(
             status_code=403,

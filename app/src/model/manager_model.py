@@ -5,7 +5,7 @@ from pydantic import BaseModel, validator
 from app.src.model.base.base_model import CustomBaseModel, check_length_string
 
 
-class CreateUser(CustomBaseModel):
+class CreateManager(CustomBaseModel):
     name: Optional[str] = None
     code: Optional[str] = None
     date_of_birth: Optional[str] = None
@@ -16,7 +16,7 @@ class CreateUser(CustomBaseModel):
     email: Optional[str] = None
     user_name: Optional[str] = None
     password: Optional[str] = None
-    role: Optional[str] = "USER"
+    role: Optional[str] = "MANAGER"
 
     @validator('name', pre=True)
     def check_name(cls, value):
@@ -67,7 +67,7 @@ class CreateUser(CustomBaseModel):
         return value
 
 
-class DetailUser(CustomBaseModel):
+class DetailManager(CustomBaseModel):
     id: Optional[str] = None
     name: Optional[str] = None
     code: Optional[str] = None
@@ -80,10 +80,9 @@ class DetailUser(CustomBaseModel):
     user_name: Optional[str] = None
     avatar: Optional[str] = None
     role: Optional[str] = None
-    password: Optional[str] = None
 
 
-class ListUser(CustomBaseModel):
+class ListManager(CustomBaseModel):
     name: Optional[str] = None
     code: Optional[str] = None
     date_of_birth: Optional[str] = None
@@ -92,7 +91,7 @@ class ListUser(CustomBaseModel):
     avatar: Optional[str] = None
 
 
-class UpdateUser(BaseModel):
+class UpdateManager(BaseModel):
     name: Optional[str] = None
     date_of_birth: Optional[str] = None
     gender: Optional[str] = None
