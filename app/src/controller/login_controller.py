@@ -24,3 +24,15 @@ def login(request: Request, login: LoginRequest):
         raise BusinessException(http_code=http_status,
                                 path=request.url.path,
                                 message=f"LOGIN FAIL- {error_message}!")
+
+
+@router.post('/login/manager')
+def login(request: Request, login: LoginRequest):
+    try:
+        response = login_service.login_manager(data_login=login)
+        return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
+    except Exception as ex:
+        http_status, error_message = gen_exception_service(ex)
+        raise BusinessException(http_code=http_status,
+                                path=request.url.path,
+                                message=f"LOGIN FAIL- {error_message}!")

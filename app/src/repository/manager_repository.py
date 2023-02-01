@@ -94,7 +94,7 @@ class ManagerRepository(MongoBaseRepo):
         if not user_result:
             return False
         user_result_dict = self._dict_to_create_manager_result(user_result)
-        return True
+        return user_result_dict
 
     def update_manager_repo(self, code: str, data_update: UpdateManager):
         data_update = data_update.dict()

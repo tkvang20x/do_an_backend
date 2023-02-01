@@ -78,6 +78,7 @@ class DetailManager(CustomBaseModel):
     phone: Optional[str] = None
     email: Optional[str] = None
     user_name: Optional[str] = None
+    password: Optional[str] = None
     avatar: Optional[str] = None
     role: Optional[str] = None
 

@@ -1,6 +1,6 @@
 import os
 
-from starlette.staticfiles import StaticFiles
+from starlette.middleware.cors import CORSMiddleware
 
 from app.src.base.base_api import app
 from app.src.controller import books_controller, login_controller, user_controller, image_controller, book_controller, \
@@ -9,6 +9,13 @@ from app.src.controller import books_controller, login_controller, user_controll
 BASEDIR = os.path.dirname(__file__)
 # app.mount("/controller/storage", StaticFiles(directory=BASEDIR + "/controller/storage"), name="storage")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(
     login_controller.router,
