@@ -54,16 +54,18 @@ class BooksRepository(MongoBaseRepo):
             total_page = 0
             skip = (page - 1) * size
             # build filter condition
-            # Get list ocr_engine by condition
-            filter_condition.update(self._record_status_active)
+            filter_condition_count_document = {}
+            filter_condition_count_document.update(self._record_status_active)
+            filter_condition_count_document.update(filter_condition)
             if group_code is not None:
                 filter_aggregation = {'$match': {'is_active': True,'group_code': group_code}}
-                filter_condition.update({'group_code': group_code})
+                filter_condition_count_document.update({'group_code': group_code})
             else:
                 filter_aggregation = {'$match': {'is_active': True}}
             sort_aggregation = {'$sort': {f'{order_by}': order}}
             skip_aggregation = {'$skip': skip}
             size_aggregation = {'$limit': size}
+            filter_condition = {'$match': filter_condition}
 
             group_lookup = {'$lookup': {
                 "from": "groups",
@@ -75,6 +77,7 @@ class BooksRepository(MongoBaseRepo):
             # build query
             querry_command = [
                 filter_aggregation,
+                filter_condition,
                 sort_aggregation,
                 skip_aggregation,
                 size_aggregation,
@@ -94,7 +97,7 @@ class BooksRepository(MongoBaseRepo):
                               list_books_result_dict]
 
             # count total
-            total = self.books_collection.count_documents(filter_condition)
+            total = self.books_collection.count_documents(filter_condition_count_document)
             # calculate total page
             if not total or total == 0:
                 total_page = 0
