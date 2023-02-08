@@ -18,7 +18,7 @@ SECRET_KEY = '123456'
 
 def generate_token(username: Union[str, Any], code: Union[str, Any], role: Union[str, Any]) -> str:
     expire = datetime.utcnow() + timedelta(
-        seconds=60 * 30  # Expired after 3 days
+        seconds=60 * 60  # Expired after 3 days
     )
     to_encode = {
         "exp": expire, "username": username, "code": code, "role": role

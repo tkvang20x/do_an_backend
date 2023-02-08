@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 
 from pydantic import BaseModel
@@ -18,7 +19,7 @@ class DetailBooks(CustomBaseModel):
     publishing_year: Optional[str] = None
     origin: Optional[str] = None
     avatar: Optional[str] = None
-    total_books: Optional[int] = 0
+    amount: Optional[int] = 0
     group_code: Optional[str] = None
     groups: Optional[GroupBooks] = None
 
@@ -41,10 +42,19 @@ class CreateDataBook(CustomBaseModel):
     author: Optional[str] = None
     name_university: Optional[str] = None
     publishing_year: Optional[str] = None
-    avatar: Optional[str] = None
     origin: Optional[str] = None
     group_code: Optional[str] = None
     amount: Optional[int] = None
+
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate_to_json
+
+    @classmethod
+    def validate_to_json(cls, value):
+        if isinstance(value, str):
+            return cls(**json.loads(value))
+        return value
 
 
 class UpdateBookData(BaseModel):

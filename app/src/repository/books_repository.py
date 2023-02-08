@@ -37,7 +37,8 @@ class BooksRepository(MongoBaseRepo):
 
     def _dict_to_create_book_result(self, dict_book: dict):
         dict_object_id = mongo_utils.convert_object_id_to_string(dict_book)
-        dict_object_id['groups'] = dict_object_id.get('groups')[0]
+        if dict_object_id['groups']:
+            dict_object_id['groups'] = dict_object_id.get('groups')[0]
         result = DetailBooks(**dict_object_id)
         result.id = dict_object_id.get('_id')
         return result

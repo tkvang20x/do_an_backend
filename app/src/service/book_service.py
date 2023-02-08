@@ -52,7 +52,7 @@ class BookService(metaclass=Singleton):
     @types.coroutine
     def create_book_service(self, code_books: str, path_folder: str):
         try:
-            time.sleep(0.001)
+            # time.sleep(0.0001)
             data_create = DetailBook()
             data_create.modified_time = datetime_utils.get_string_datetime_now()
             data_create.created_time = datetime_utils.get_string_datetime_now()
@@ -64,7 +64,7 @@ class BookService(metaclass=Singleton):
             img_qrcode = qrcode.make(data_create.code_id)
             img_qrcode.save(f'{path_folder}\qrcode\{data_create.code_id}.png')
             data_create.qr_code_data = f'\qrcode\{data_create.code_id}.png'
-            create_book_result = self.book_repo.create_book_repo(data=data_create)
+            # create_book_result = self.book_repo.create_book_repo(data=data_create)
 
             create_book_result = self.book_repo.create_book_repo(data=data_create)
             if not create_book_result:

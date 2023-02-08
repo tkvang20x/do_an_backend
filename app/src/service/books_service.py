@@ -16,7 +16,8 @@ class BooksService(metaclass=Singleton):
         self.books_repo = BooksRepository()
         self.book_repo = BookService()
 
-    def create_books_service(self, data_create: CreateDataBook, path_folder: str, user: str = ""):
+    @types.coroutine
+    def create_books_service(self, data_create: CreateDataBook,avatar: UploadFile, path_folder: str, user: str = ""):
         try:
             amount = data_create.amount
             data_create_dict = data_create.dict()
@@ -25,9 +26,14 @@ class BooksService(metaclass=Singleton):
             data_create.created_time = datetime_utils.get_string_datetime_now()
             data_create.created_by = user
             data_create.code = "BOOKS_" + str(datetime_utils.get_timestamp_now())
+
+            if avatar is not None:
+                path_avatar = yield from image_utils.create_upload_file(path_folder, avatar)
+                data_create.avatar = path_avatar
+
             create_book_result = self.books_repo.create_book_repo(data=data_create)
             if not create_book_result:
-                raise RuntimeError(f'Create new Engine error!')
+                raise RuntimeError(f'Create new Books error!')
 
             if amount > 0:
                 for i in range(amount):
