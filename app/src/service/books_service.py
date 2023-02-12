@@ -71,11 +71,11 @@ class BooksService(metaclass=Singleton):
 
     def build_filter_condition(self, name: str, code: str, author: str):
         filter_condition = {}
-        if not string_utils.string_none_or_empty(name):
+        if name is not None and len(name.strip()) > 0:
             filter_condition.update({'name': mongo_utils.build_filter_like_keyword(name.strip())})
-        if not string_utils.string_none_or_empty(code):
+        if code is not None and len(code.strip()) > 0:
             filter_condition.update({'code': mongo_utils.build_filter_like_keyword(code.strip())})
-        if not string_utils.string_none_or_empty(author):
+        if author is not None and len(author.strip()) > 0:
             filter_condition.update({'author': mongo_utils.build_filter_like_keyword(author.strip())})
         return filter_condition
 

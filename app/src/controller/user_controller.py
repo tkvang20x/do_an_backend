@@ -20,12 +20,13 @@ user_service = UserService()
 BASEDIR = os.path.dirname(__file__)
 app.mount("/storage", StaticFiles(directory=BASEDIR + "/storage"), name="storage")
 
+
 @router.get(path="/users", response_description="Get list user")
 def get_list_users(request: Request,
                    page: int = 1,
                    size: int = 10,
                    order_by: str = Query(default="modified_time",
-                                         enum=["modified_time", "created_time"]),
+                                         enum=["modified_time", "created_time", "name"]),
                    order: int = Query(default=-1, enum=[-1, 1]),
                    name: str = None,
                    code: str = None):

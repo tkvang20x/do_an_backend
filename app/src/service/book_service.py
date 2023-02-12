@@ -23,11 +23,12 @@ class BookService(metaclass=Singleton):
                       order_by: str,
                       order: int,
                       code_books: str,
+                      code_id:str,
                       status_book: str,
                       status_borrow: str,
                       user_borrow: str):
         try:
-            filter_condition = self.build_filter_condition(code_books=code_books, status_book=status_book,
+            filter_condition = self.build_filter_condition(code_books=code_books,code_id=code_id, status_book=status_book,
                                                            status_borrow=status_borrow, user_borrow=user_borrow)
             list_book = self.book_repo.get_list_book_repo(page=page,
                                                           size=size,
@@ -39,13 +40,15 @@ class BookService(metaclass=Singleton):
             http_status, error_message = gen_exception_service(ex)
             raise BusinessException(message=error_message, http_code=http_status)
 
-    def build_filter_condition(self, code_books: str, status_book: str, status_borrow: str, user_borrow: str):
+    def build_filter_condition(self, code_books: str,code_id:str, status_book: str, status_borrow: str, user_borrow: str):
         filter_condition = {'code_books': code_books}
-        if not string_utils.string_none_or_empty(status_book):
+        if code_id is not None and len(code_id.strip()) > 0:
+            filter_condition.update({'code_id': mongo_utils.build_filter_like_keyword(code_id.strip())})
+        if status_book is not None and len(status_book.strip()) > 0:
             filter_condition.update({'status_book': mongo_utils.build_filter_like_keyword(status_book.strip())})
-        if not string_utils.string_none_or_empty(status_borrow):
+        if status_borrow is not None and len(status_borrow.strip()) > 0:
             filter_condition.update({'status_borrow': mongo_utils.build_filter_like_keyword(status_borrow.strip())})
-        if not string_utils.string_none_or_empty(user_borrow):
+        if user_borrow is not None and len(user_borrow.strip()) > 0:
             filter_condition.update({'user_borrow': mongo_utils.build_filter_like_keyword(user_borrow.strip())})
         return filter_condition
 
