@@ -4,9 +4,10 @@ from fastapi import UploadFile, File
 from starlette import status
 
 from app.src.base.base_service import Singleton
-from app.src.model.books_model import CreateDataBook, DetailBooks, UpdateBookData
+from app.src.model.books_model import CreateDataBook, DetailBooks, UpdateBookData, UpdateBookDataFormService
 from app.src.repository.books_repository import BooksRepository
 from app.src.service.book_service import BookService
+from app.src.service.group_books_service import GroupBooksService
 from app.src.ultities import datetime_utils, string_utils, mongo_utils, image_utils
 from app.src.base.base_exception import gen_exception_service, BusinessException
 
@@ -15,6 +16,7 @@ class BooksService(metaclass=Singleton):
     def __init__(self):
         self.books_repo = BooksRepository()
         self.book_repo = BookService()
+        self.group_repo = GroupBooksService()
 
     @types.coroutine
     def create_books_service(self, data_create: CreateDataBook,avatar: UploadFile, path_folder: str, user: str = ""):
@@ -88,10 +90,17 @@ class BooksService(metaclass=Singleton):
             http_status, error_message = gen_exception_service(e)
             raise BusinessException(message=error_message, http_code=http_status)
 
-    def update_books_service(self, code: str, data_update: UpdateBookData):
+    @types.coroutine
+    def update_books_service(self, code: str, data_update: UpdateBookData, avatar:UploadFile, path_folder:str):
         try:
-            self.get_detail_books_service(code=code.strip())
-            update_data = self.books_repo.update_book_repo(code=code, data_update=data_update)
+            detail_books = self.get_detail_books_service(code=code.strip())
+            data_update_form_service = UpdateBookDataFormService(**data_update.dict())
+            data_update_form_service.avatar = detail_books.avatar
+
+            if avatar is not None:
+                path_avatar = yield from image_utils.create_upload_file(path_folder, avatar)
+                data_update_form_service.avatar = path_avatar
+            update_data = self.books_repo.update_book_repo(code=code, data_update=data_update_form_service)
             return update_data
         except Exception as e:
             http_status, error_message = gen_exception_service(e)

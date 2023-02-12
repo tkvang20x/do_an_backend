@@ -1,6 +1,7 @@
 import json
 from typing import Optional
 
+from fastapi import UploadFile
 from pydantic import BaseModel
 
 from app.src.model.base.base_model import CustomBaseModel
@@ -64,9 +65,30 @@ class UpdateBookData(BaseModel):
     author: Optional[str] = None
     name_university: Optional[str] = None
     publishing_year: Optional[str] = None
-    avatar: Optional[str] = None
     origin: Optional[str] = None
     group_code: Optional[str] = None
+
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate_to_json
+
+    @classmethod
+    def validate_to_json(cls, value):
+        if isinstance(value, str):
+            return cls(**json.loads(value))
+        return value
+
+
+class UpdateBookDataFormService(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    title: Optional[str] = None
+    author: Optional[str] = None
+    name_university: Optional[str] = None
+    publishing_year: Optional[str] = None
+    origin: Optional[str] = None
+    group_code: Optional[str] = None
+    avatar: Optional[str] = None
 
 
 class BooksFormInDB(CustomBaseModel):

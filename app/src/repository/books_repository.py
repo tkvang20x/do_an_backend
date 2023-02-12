@@ -3,7 +3,7 @@ from builtins import filter
 
 from app.src.base.base_repository import MongoBaseRepo
 from app.src.model.base import base_model
-from app.src.model.books_model import CreateDataBook, DetailBooks, ListBook, UpdateBookData
+from app.src.model.books_model import CreateDataBook, DetailBooks, ListBook, UpdateBookData, UpdateBookDataFormService
 from app.src.repository.book_repository import BookRepository
 from app.src.ultities import mongo_utils, collection_utils, datetime_utils
 
@@ -150,7 +150,7 @@ class BooksRepository(MongoBaseRepo):
         book_result_dict = self._dict_to_create_book_result(books_result_dict[0])
         return book_result_dict
 
-    def update_book_repo(self, code: str, data_update: UpdateBookData):
+    def update_book_repo(self, code: str, data_update: UpdateBookDataFormService):
         data_update = data_update.dict()
         data_update['modified_time'] = datetime_utils.get_string_datetime_now()
         code = code.strip()

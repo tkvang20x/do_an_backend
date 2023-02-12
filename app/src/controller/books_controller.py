@@ -1,6 +1,7 @@
 import os
+from typing import Optional
 
-from fastapi import APIRouter, Request, Query, Depends, Body, UploadFile, File
+from fastapi import APIRouter, Request, Query, Depends, Body, UploadFile, File, Form
 from starlette import status
 from fastapi.security import HTTPBearer
 from starlette.staticfiles import StaticFiles
@@ -53,7 +54,7 @@ def get_list_books(request: Request,
 
 
 @router.post(path="/books", response_description="Create new books")
-async def create_books(request: Request, data: CreateDataBook = Body(...),avatar: UploadFile = File(...), user=Depends(validate_token)):
+async def create_books(request: Request, data: CreateDataBook = Form(...),avatar: UploadFile = File(...), user=Depends(validate_token)):
     try:
         if user.get('role') == 'USER':
             raise BusinessException(message=f'User not permission to access resource!',
@@ -80,9 +81,12 @@ def get_detail_books(request: Request, code: str):
 
 
 @router.put(path="/books/{code}", response_description="Update books")
-def update_books(request: Request, code: str, data_update: UpdateBookData = Body()):
+async def update_books(request: Request, code: str, data_update: UpdateBookData = Form(...), avatar: UploadFile = File(None)):
     try:
-        response = books_service.update_books_service(code=code, data_update=data_update)
+        # if user.get('role') == 'USER':
+        #     raise BusinessException(message=f'User not permission to access resource!',
+        #                             http_code=status.HTTP_403_FORBIDDEN)
+        response = await books_service.update_books_service(code=code, data_update=data_update,avatar=avatar, path_folder=BASEDIR)
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)
