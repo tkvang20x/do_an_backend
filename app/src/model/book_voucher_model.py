@@ -7,6 +7,11 @@ from app.src.model.book_model import DetailBook
 from app.src.model.user_model import DetailUser
 
 
+class BooksAmount(BaseModel):
+    books_code: Optional[str] = None
+    amount: Optional[int] = 0
+
+
 class VoucherCreate(CustomBaseModel):
     books_borrowed: Optional[List[str]] = None
     due_date: Optional[str] = None

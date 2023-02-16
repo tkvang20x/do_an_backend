@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from starlette import status
 
 from app.src.base.base_exception import BusinessException, gen_exception_service
@@ -37,6 +39,8 @@ class BookVoucherService(metaclass=Singleton):
             raise BusinessException(message=error_message, http_code=http_status)
 
     def get_list_voucher_by_user_id(self, user_id: str,
+                                    voucher_id: str,
+                                    user_name: str,
                                     page: int,
                                     size: int,
                                     order_by: str,
@@ -45,8 +49,9 @@ class BookVoucherService(metaclass=Singleton):
                                     due_date: str,
                                     status_voucher: str):
         try:
-            filter_condition = self.build_filter_condition(user_id=user_id, start_date=start_date, due_date=due_date,
-                                                           status_voucher=status_voucher)
+            filter_condition = self.build_filter_condition(user_id=user_id, voucher_id=voucher_id,
+                                                           start_date=start_date, due_date=due_date,
+                                                           status_voucher=status_voucher, user_name=user_name)
             list_book = self.voucher_repo.get_list_voucher_by_user_id_repo(
                 page=page,
                 size=size,
@@ -58,16 +63,21 @@ class BookVoucherService(metaclass=Singleton):
             http_status, error_message = gen_exception_service(ex)
             raise BusinessException(message=error_message, http_code=http_status)
 
-    def build_filter_condition(self, user_id: str, start_date: str, due_date: str, status_voucher: str):
+    def build_filter_condition(self, user_id: str, voucher_id: str, start_date: str, due_date: str, status_voucher: str,
+                               user_name: str):
         filter_condition = {}
         if not string_utils.string_none_or_empty(user_id):
-            filter_condition.update({'user_id': user_id})
-        if not string_utils.string_none_or_empty(start_date):
-            filter_condition.update({'start_date': start_date})
-        if not string_utils.string_none_or_empty(due_date):
-            filter_condition.update({'due_date': due_date})
+            filter_condition.update({'user_id': mongo_utils.build_filter_like_keyword(user_id.strip())})
+        if not string_utils.string_none_or_empty(voucher_id):
+            filter_condition.update({'voucher_id': mongo_utils.build_filter_like_keyword(voucher_id.strip())})
+        if not string_utils.string_none_or_empty(start_date) and not string_utils.string_none_or_empty(due_date):
+            filter_condition.update({"start_date": {"$gte": mongo_utils.build_filter_like_keyword(start_date.strip()),
+                                                    "$lt": mongo_utils.build_filter_like_keyword(due_date.strip())}})
+        if not string_utils.string_none_or_empty(user_name):
+            filter_condition.update({'user_name': mongo_utils.build_filter_like_keyword(user_name.strip())})
         if not string_utils.string_none_or_empty(status_voucher):
             filter_condition.update({'status_voucher': status_voucher})
+
         return filter_condition
 
     def get_detail_voucher_service(self, voucher_id: str):

@@ -103,3 +103,4 @@ class BooksFormInDB(CustomBaseModel):
     origin: Optional[str] = None
     avatar: Optional[str] = None
     group_code: Optional[str] = None
+    total_books_ready:Optional[str] = None

@@ -1,3 +1,5 @@
+import datetime
+
 from fastapi import APIRouter, Request, Query
 from starlette import status
 
@@ -22,6 +24,8 @@ def get_list_voucher_by_user_id(request: Request,
                                                       enum=["modified_time", "created_time"]),
                                 order: int = Query(default=-1, enum=[-1, 1]),
                                 user_id: str = None,
+                                voucher_id: str = None,
+                                user_name: str = None,
                                 status_voucher: str = None,
                                 start_date: str = None,
                                 due_date: str = None):
@@ -31,6 +35,8 @@ def get_list_voucher_by_user_id(request: Request,
                                                                size=size,
                                                                order_by=order_by,
                                                                order=order,
+                                                               voucher_id=voucher_id,
+                                                               user_name=user_name,
                                                                start_date=start_date,
                                                                due_date=due_date,
                                                                status_voucher=status_voucher)

@@ -57,7 +57,7 @@ class BookRepository(MongoBaseRepo):
             logging.error(f"Get List OCR Engine error -- Caused by '{e.__str__()}")
             return None
 
-    def get_all_book_repo(self, code_books: str):
+    def get_all_book_repo(self, code_books: str, status_borrow: str = ""):
         try:
             # init data
             total = 0
@@ -65,7 +65,10 @@ class BookRepository(MongoBaseRepo):
             # build filter condition
             # Get list ocr_engine by condition
             filter_condition.update(self._record_status_active)
-            filter_condition.update({"code_books": code_books})
+            if status_borrow != "":
+                filter_condition.update({"code_books": code_books,"status_borrow":status_borrow})
+            else:
+                filter_condition.update({"code_books": code_books})
             # count total
             total = self.book_collection.count_documents(filter_condition)
             return total
@@ -119,6 +122,8 @@ class BookRepository(MongoBaseRepo):
         dict_object_id['books'] = dict_object_id.get('books')[0]
         result = DetailBook(**dict_object_id)
         result.id = dict_object_id.get('_id')
+        total_books_ready = self.get_all_book_repo(code_books=result.code_books, status_borrow="READY")
+        result.books.total_books_ready = total_books_ready
         return result
 
     def update_book_repo(self, code_id: str, data_update: UpdateBook):

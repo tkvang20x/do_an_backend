@@ -124,7 +124,7 @@ class BooksRepository(MongoBaseRepo):
         else:
             dict_object_id['groups'] = None
         result = ListBook(**dict_object_id)
-        result.total_books = self.book_repository.get_all_book_repo(result.code)
+        result.total_books = self.book_repository.get_all_book_repo(code_books=result.code)
         return result
 
     def get_detail_book_repo(self, code: str):
