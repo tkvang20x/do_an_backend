@@ -9,6 +9,7 @@ from app.src.repository.book_repository import BookRepository
 from app.src.repository.book_voucher_repository import BookVoucherRepository
 from app.src.repository.user_repository import UserRepository
 from app.src.ultities import datetime_utils, const_utils, string_utils, mongo_utils
+from app.src.ultities.const_utils import StatusVoucher
 
 
 class BookVoucherService(metaclass=Singleton):
@@ -28,7 +29,7 @@ class BookVoucherService(metaclass=Singleton):
 
             data_create_convert.start_date = datetime_utils.get_string_datetime_now()
             data_create_convert.voucher_id = 'VOUCHER_' + str(datetime_utils.get_milisecond_time())
-            data_create_convert.status = const_utils.StatusVoucher.WAITING_CONFIRM.value
+            data_create_convert.status_voucher = const_utils.StatusVoucher.WAITING_CONFIRM.value
 
             create_voucher_result = self.voucher_repo.create_voucher_repo(data_create=data_create_convert)
             if not create_voucher_result:
@@ -114,6 +115,27 @@ class BookVoucherService(metaclass=Singleton):
                 raise BusinessException(message=f'Delete voucher {voucher_id} remove fail!',
                                         http_code=status.HTTP_304_NOT_MODIFIED)
             return True
+        except Exception as e:
+            http_status, error_message = gen_exception_service(e)
+            raise BusinessException(message=error_message, http_code=http_status)
+
+    def update_status_voucher_service(self, voucher_id: str, status_voucher: str):
+        status_update = ""
+        try:
+            voucher_detail = self.get_detail_voucher_service(voucher_id=voucher_id.strip())
+            if voucher_detail.status_voucher == StatusVoucher.WAITING_CONFIRM.value:
+                status_update = StatusVoucher.CONFIRMED.value
+            if voucher_detail.status_voucher == StatusVoucher.CONFIRMED.value:
+                status_update = StatusVoucher.PAYED.value
+            if voucher_detail.status_voucher == StatusVoucher.EXPIRED.value:
+                status_update = StatusVoucher.PAYED.value
+            if voucher_detail.status_voucher == StatusVoucher.PAYED.value:
+                status_update = StatusVoucher.PAYED.value
+            if status_voucher == StatusVoucher.CANCELLED.value:
+                status_update = StatusVoucher.CANCELLED.value
+            update_data = self.voucher_repo.update_status_voucher_repo(voucher_id=voucher_id,
+                                                                       status_update=status_update)
+            return update_data
         except Exception as e:
             http_status, error_message = gen_exception_service(e)
             raise BusinessException(message=error_message, http_code=http_status)

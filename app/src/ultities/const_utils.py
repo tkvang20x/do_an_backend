@@ -14,6 +14,6 @@ class StatusBorrow(Enum):
 class StatusVoucher(Enum):
     WAITING_CONFIRM = 'WAITING_CONFIRM'
     CONFIRMED = 'CONFIRMED'
-    CANCELLED = 'CANCELLED'
     PAYED = 'PAYED'
     EXPIRED = 'EXPIRED'
+    CANCELLED = 'CANCELLED'

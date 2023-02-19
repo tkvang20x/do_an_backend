@@ -1,4 +1,5 @@
 import datetime
+from typing import Optional
 
 from fastapi import APIRouter, Request, Query
 from starlette import status
@@ -6,7 +7,7 @@ from starlette import status
 from app.src.base.base_exception import BusinessException, gen_exception_service
 from app.src.base.base_model import ResponseCommon
 from app.src.base.base_service import BaseRoute
-from app.src.model.book_voucher_model import VoucherCreate, VoucherUpdate
+from app.src.model.book_voucher_model import VoucherCreate, VoucherUpdate, StatusVoucher
 from app.src.service.book_voucher_service import BookVoucherService
 
 router = APIRouter(
@@ -76,6 +77,19 @@ def get_detail_voucher(request: Request, voucher_id: str):
 def update_voucher(request: Request, voucher_id: str, data_update: VoucherUpdate):
     try:
         response = voucher_service.update_voucher_service(voucher_id=voucher_id, data_update=data_update)
+        return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
+    except Exception as ex:
+        http_status, error_message = gen_exception_service(ex)
+        raise BusinessException(http_code=http_status,
+                                path=request.url.path,
+                                message=f"Update book error. - Caused by: [{error_message}]")
+
+
+@router.put(path="/voucher/{voucher_id}/status", response_description="Update status voucher")
+def update_status_voucher(request: Request, voucher_id: str, status_update: StatusVoucher):
+    try:
+        response = voucher_service.update_status_voucher_service(voucher_id=voucher_id,
+                                                                 status_voucher=status_update.status_update)
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)
