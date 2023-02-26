@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Request, Query
+from fastapi import APIRouter, Request, Query, Depends
 from starlette import status
 
 from app.src.base.base_exception import BusinessException, gen_exception_service
@@ -9,6 +9,7 @@ from app.src.base.base_model import ResponseCommon
 from app.src.base.base_service import BaseRoute
 from app.src.model.book_voucher_model import VoucherCreate, VoucherUpdate, StatusVoucher
 from app.src.service.book_voucher_service import BookVoucherService
+from app.src.ultities.token_utils import validate_token
 
 router = APIRouter(
     route_class=BaseRoute
@@ -50,9 +51,9 @@ def get_list_voucher_by_user_id(request: Request,
 
 
 @router.post(path="/voucher", response_description="Create new voucher")
-def create_voucher(request: Request, data_create: VoucherCreate):
+def create_voucher(request: Request, data_create: VoucherCreate, user=Depends(validate_token)):
     try:
-        response = voucher_service.create_voucher_service(data_create=data_create)
+        response = voucher_service.create_voucher_service(data_create=data_create, user=user.get('code'))
         return ResponseCommon().success(result=response, status=status.HTTP_201_CREATED, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)
@@ -74,9 +75,9 @@ def get_detail_voucher(request: Request, voucher_id: str):
 
 
 @router.put(path="/voucher/{voucher_id}", response_description="Update voucher")
-def update_voucher(request: Request, voucher_id: str, data_update: VoucherUpdate):
+def update_voucher(request: Request, voucher_id: str, data_update: VoucherUpdate, user=Depends(validate_token)):
     try:
-        response = voucher_service.update_voucher_service(voucher_id=voucher_id, data_update=data_update)
+        response = voucher_service.update_voucher_service(voucher_id=voucher_id, data_update=data_update, user=user.get('code'))
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)

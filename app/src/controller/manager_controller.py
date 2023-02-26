@@ -1,7 +1,7 @@
 import os
 import types
 
-from fastapi import APIRouter, Request, Query, UploadFile, File
+from fastapi import APIRouter, Request, Query, UploadFile, File, Form, Depends
 from starlette import status
 from starlette.staticfiles import StaticFiles
 
@@ -13,6 +13,7 @@ from app.src.model.manager_model import CreateManager, UpdateManager
 from app.src.model.user_model import CreateUser, UpdateUser
 from app.src.service.manager_service import ManagerService
 from app.src.service.user_service import UserService
+from app.src.ultities.token_utils import validate_token
 
 router = APIRouter(
     route_class=BaseRoute
@@ -48,9 +49,12 @@ def get_list_manager(request: Request,
 
 
 @router.post(path="/managers", response_description="Create new managers")
-def create_manager(request: Request, data_create: CreateManager):
+async def create_manager(request: Request, data: CreateManager = Form(...),avatar: UploadFile = File(...), user=Depends(validate_token)):
     try:
-        response = manager_service.create_manager_service(data_create=data_create, user="")
+        if user.get('role') == 'USER' or user.get('role') == 'MANAGER':
+            raise BusinessException(message=f'User not permission to access resource!',
+                                    http_code=status.HTTP_403_FORBIDDEN)
+        response = await manager_service.create_manager_service(data_create=data,avatar=avatar, path_folder=BASEDIR, user="")
         return ResponseCommon().success(result=response, status=status.HTTP_201_CREATED, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)

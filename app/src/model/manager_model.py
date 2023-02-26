@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 
 from pydantic import BaseModel, validator
@@ -7,7 +8,6 @@ from app.src.model.base.base_model import CustomBaseModel, check_length_string
 
 class CreateManager(CustomBaseModel):
     name: Optional[str] = None
-    code: Optional[str] = None
     date_of_birth: Optional[str] = None
     gender: Optional[str] = None
     course: Optional[str] = None
@@ -18,15 +18,19 @@ class CreateManager(CustomBaseModel):
     password: Optional[str] = None
     role: Optional[str] = "MANAGER"
 
+    @classmethod
+    def __get_validators__(cls):
+        yield cls.validate_to_json
+
+    @classmethod
+    def validate_to_json(cls, value):
+        if isinstance(value, str):
+            return cls(**json.loads(value))
+        return value
+
     @validator('name', pre=True)
     def check_name(cls, value):
         check_length_string(name="name", value=value, max_length=32,
-                            message_title="USER MODEL")
-        return value
-
-    @validator('code', pre=True)
-    def check_code(cls, value):
-        check_length_string(name="code", value=value, max_length=32,
                             message_title="USER MODEL")
         return value
 

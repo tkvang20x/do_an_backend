@@ -41,13 +41,18 @@ class ManagerService(metaclass=Singleton):
             filter_condition.update({'code': code})
         return filter_condition
 
-    def create_manager_service(self, data_create: CreateManager, user: ""):
+    @types.coroutine
+    def create_manager_service(self, data_create: CreateManager, avatar: UploadFile, path_folder: str, user: ""):
         data_create_dict = data_create.dict()
         data_create = DetailManager(**data_create_dict)
         data_create.modified_time = datetime_utils.get_string_datetime_now()
         data_create.created_time = datetime_utils.get_string_datetime_now()
         data_create.created_by = user
         data_create.code = "MANAGER_" + str(datetime_utils.get_timestamp_now())
+
+        if avatar is not None:
+            path_avatar = yield from image_utils.create_upload_file(path_folder, avatar)
+            data_create.avatar = path_avatar
         create_user_result = self.manager_repo.create_manager_repo(data_create=data_create)
         if not create_user_result:
             raise RuntimeError(f'Create new User error!')

@@ -4,9 +4,11 @@ from starlette import status
 
 from app.src.base.base_exception import BusinessException, gen_exception_service
 from app.src.base.base_service import Singleton
+from app.src.model.book_model import UpdateBook
 from app.src.model.book_voucher_model import VoucherCreate, VoucherDetail, VoucherUpdate
 from app.src.repository.book_repository import BookRepository
 from app.src.repository.book_voucher_repository import BookVoucherRepository
+from app.src.repository.manager_repository import ManagerRepository
 from app.src.repository.user_repository import UserRepository
 from app.src.ultities import datetime_utils, const_utils, string_utils, mongo_utils
 from app.src.ultities.const_utils import StatusVoucher
@@ -17,8 +19,9 @@ class BookVoucherService(metaclass=Singleton):
         self.user_repo = UserRepository()
         self.book_repo = BookRepository()
         self.voucher_repo = BookVoucherRepository()
+        self.manager_repo = ManagerRepository()
 
-    def create_voucher_service(self, data_create: VoucherCreate):
+    def create_voucher_service(self, data_create: VoucherCreate, user: str):
         try:
             data_create_dict = data_create.dict()
             data_create_convert = VoucherDetail(**data_create_dict)
@@ -30,10 +33,24 @@ class BookVoucherService(metaclass=Singleton):
             data_create_convert.start_date = datetime_utils.get_string_datetime_now()
             data_create_convert.voucher_id = 'VOUCHER_' + str(datetime_utils.get_milisecond_time())
             data_create_convert.status_voucher = const_utils.StatusVoucher.WAITING_CONFIRM.value
+            data_create_convert.modified_time = datetime_utils.get_string_datetime_now()
+
+            user_result = self.user_repo.get_detail_user_repo(code=data_create_convert.user_id)
+            manager_result = self.manager_repo.get_detail_manager_repo(code=user)
+
+            data_create_convert.user_name = user_result.user_name
+
+            data_create_convert.manager_name = manager_result.user_name
+            data_create_convert.manager_id = manager_result.code
+            data_create_convert.created_by = manager_result.user_name
 
             create_voucher_result = self.voucher_repo.create_voucher_repo(data_create=data_create_convert)
             if not create_voucher_result:
                 raise RuntimeError(f'Create new voucher error!')
+
+            for book in data_create_convert.books_borrowed:
+                self.book_repo.update_book_repo(code_id=book, data_update=UpdateBook(status_borrow="BORROWING",
+                                                                                     user_borrow=user_result.user_name))
             return create_voucher_result
         except Exception as ex:
             http_status, error_message = gen_exception_service(ex)
@@ -92,7 +109,7 @@ class BookVoucherService(metaclass=Singleton):
             http_status, error_message = gen_exception_service(e)
             raise BusinessException(message=error_message, http_code=http_status)
 
-    def update_voucher_service(self, voucher_id: str, data_update: VoucherUpdate):
+    def update_voucher_service(self, voucher_id: str, data_update: VoucherUpdate, user: str):
         try:
             self.get_detail_voucher_service(voucher_id=voucher_id.strip())
             if len(data_update.books_borrowed) > 0:
@@ -101,6 +118,9 @@ class BookVoucherService(metaclass=Singleton):
                     if check_book is None:
                         raise BusinessException(message=f'book by code [{book_id}] not exist!',
                                                 http_code=status.HTTP_404_NOT_FOUND)
+            data_update.modified_time = datetime_utils.get_string_datetime_now()
+            manager_result = self.manager_repo.get_detail_manager_repo(code=user)
+            data_update.modified_by = manager_result.user_name
             update_data = self.voucher_repo.update_voucher_repo(voucher_id=voucher_id, data_update=data_update)
             return update_data
         except Exception as e:

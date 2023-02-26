@@ -32,6 +32,6 @@ class DetailBook(CustomBaseModel):
 
 
 class UpdateBook(CustomBaseModel):
-    status_book: Optional[str] = None
+    # status_book: Optional[str] = None
     status_borrow: Optional[str] = None
     user_borrow: Optional[str] = None

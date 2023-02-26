@@ -16,7 +16,6 @@ class VoucherCreate(CustomBaseModel):
     books_borrowed: Optional[List[str]] = None
     due_date: Optional[str] = None
     user_id: Optional[str] = None
-    manager_id: Optional[str] = None
     description: Optional[str] = None
 
 
@@ -29,6 +28,8 @@ class VoucherDetail(CustomBaseModel):
     due_date: Optional[str] = None
     status_voucher: Optional[str] = None
     description: Optional[str] = None
+    user_name: Optional[str] = None
+    manager_name: Optional[str] = None
 
 
 class VoucherDetailOutDB(CustomBaseModel):
@@ -41,12 +42,13 @@ class VoucherDetailOutDB(CustomBaseModel):
     due_date: Optional[str] = None
     status_voucher: Optional[str] = None
     description: Optional[str] = None
+    user_name: Optional[str] = None
+    manager_name: Optional[str] = None
 
 
-class VoucherUpdate(BaseModel):
+class VoucherUpdate(CustomBaseModel):
     books_borrowed: Optional[List[str]] = None
     due_date: Optional[str] = None
-    manager_id: Optional[str] = None
     description: Optional[str] = None
     user_id: Optional[str] = None
 

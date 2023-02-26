@@ -16,6 +16,7 @@ class CustomBaseModel(BaseModel):
     created_by: Optional[str] = Field(default="")
     created_time: Optional[str] = Field(default=datetime_utils.get_string_datetime_now())
     modified_time: Optional[str] = Field(default="")
+    modified_by: Optional[str] = Field(default="")
 
 
 def check_length_array_string(name: str, list_value: List[str], max_length: int, message_title: str):
