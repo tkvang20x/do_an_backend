@@ -1,7 +1,7 @@
 import os
 import types
 
-from fastapi import APIRouter, Request, Query, UploadFile, File
+from fastapi import APIRouter, Request, Query, UploadFile, File, Depends
 from starlette import status
 from starlette.staticfiles import StaticFiles
 
@@ -11,6 +11,7 @@ from app.src.base.base_model import ResponseCommon
 from app.src.base.base_service import BaseRoute
 from app.src.model.user_model import CreateUser, UpdateUser
 from app.src.service.user_service import UserService
+from app.src.ultities.token_utils import validate_token
 
 router = APIRouter(
     route_class=BaseRoute
@@ -61,6 +62,18 @@ def create_user(request: Request, data_create: CreateUser):
 def get_detail_user(request: Request, code: str):
     try:
         response = user_service.get_detail_user_service(code=code)
+        return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
+    except Exception as ex:
+        http_status, error_message = gen_exception_service(ex)
+        raise BusinessException(http_code=http_status,
+                                path=request.url.path,
+                                message=f"Get detail user error. - Caused by: [{error_message}]")
+
+
+@router.get(path="/user/detail", response_description="Get detail user")
+def get_detail_user(request: Request, user=Depends(validate_token)):
+    try:
+        response = user_service.get_detail_user_service(code=user.get('code'))
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)

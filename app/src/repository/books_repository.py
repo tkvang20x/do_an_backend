@@ -47,7 +47,6 @@ class BooksRepository(MongoBaseRepo):
                            size: int,
                            order_by: str,
                            order: int,
-                           group_code: str,
                            filter_condition: dict):
         try:
             # init data
@@ -58,15 +57,15 @@ class BooksRepository(MongoBaseRepo):
             filter_condition_count_document = {}
             filter_condition_count_document.update(self._record_status_active)
             filter_condition_count_document.update(filter_condition)
-            if group_code is not None:
-                filter_aggregation = {'$match': {'is_active': True,'group_code': group_code}}
-                filter_condition_count_document.update({'group_code': group_code})
-            else:
-                filter_aggregation = {'$match': {'is_active': True}}
+            # if group_code is not None:
+            #     filter_aggregation = {'$match': {'is_active': True,'group_code': group_code}}
+            #     filter_condition_count_document.update({'group_code': group_code})
+            # else:
+            #     filter_aggregation = {'$match': {'is_active': True}}
             sort_aggregation = {'$sort': {f'{order_by}': order}}
             skip_aggregation = {'$skip': skip}
             size_aggregation = {'$limit': size}
-            filter_condition = {'$match': filter_condition}
+            filter_condition = {'$match': filter_condition_count_document}
 
             group_lookup = {'$lookup': {
                 "from": "groups",
@@ -77,7 +76,7 @@ class BooksRepository(MongoBaseRepo):
 
             # build query
             querry_command = [
-                filter_aggregation,
+                # filter_aggregation,
                 filter_condition,
                 sort_aggregation,
                 skip_aggregation,

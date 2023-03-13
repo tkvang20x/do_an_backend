@@ -57,19 +57,18 @@ class BooksService(metaclass=Singleton):
                        group_code: str
                        ):
         try:
-            filter_condition = self.build_filter_condition(name=name, code=code, author=author)
+            filter_condition = self.build_filter_condition(name=name, code=code, author=author, group_code=group_code)
             list_book = self.books_repo.get_list_book_repo(page=page,
                                                            size=size,
                                                            order_by=order_by,
                                                            order=order,
-                                                           group_code=group_code,
                                                            filter_condition=filter_condition)
             return list_book
         except Exception as ex:
             http_status, error_message = gen_exception_service(ex)
             raise BusinessException(message=error_message, http_code=http_status)
 
-    def build_filter_condition(self, name: str, code: str, author: str):
+    def build_filter_condition(self, name: str, code: str, author: str, group_code: str):
         filter_condition = {}
         if name is not None and len(name.strip()) > 0:
             filter_condition.update({'name': mongo_utils.build_filter_like_keyword(name.strip())})
@@ -77,6 +76,8 @@ class BooksService(metaclass=Singleton):
             filter_condition.update({'code': mongo_utils.build_filter_like_keyword(code.strip())})
         if author is not None and len(author.strip()) > 0:
             filter_condition.update({'author': mongo_utils.build_filter_like_keyword(author.strip())})
+        if group_code is not None and len(group_code.strip()) > 0:
+            filter_condition.update({'group_code': mongo_utils.build_filter_like_keyword(group_code.strip())})
         return filter_condition
 
     def get_detail_books_service(self, code: str):

@@ -76,7 +76,7 @@ def get_detail_manager(request: Request, code: str):
 
 
 @router.put(path="/managers/{code}", response_description="Update user")
-def update_manager(request: Request, code: str, data_update: UpdateManager):
+def update_manager(request: Request, code: str, data_update: UpdateManager = Form(...)):
     try:
         response = manager_service.update_manager_service(code=code, data_update=data_update)
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)

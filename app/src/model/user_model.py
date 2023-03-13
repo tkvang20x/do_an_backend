@@ -7,7 +7,7 @@ from app.src.model.base.base_model import CustomBaseModel, check_length_string
 
 class CreateUser(CustomBaseModel):
     name: Optional[str] = None
-    code: Optional[str] = None
+    code: Optional[str] = ""
     date_of_birth: Optional[str] = None
     gender: Optional[str] = None
     course: Optional[str] = None
@@ -21,12 +21,6 @@ class CreateUser(CustomBaseModel):
     @validator('name', pre=True)
     def check_name(cls, value):
         check_length_string(name="name", value=value, max_length=32,
-                            message_title="USER MODEL")
-        return value
-
-    @validator('code', pre=True)
-    def check_code(cls, value):
-        check_length_string(name="code", value=value, max_length=32,
                             message_title="USER MODEL")
         return value
 
