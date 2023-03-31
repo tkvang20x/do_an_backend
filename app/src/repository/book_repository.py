@@ -54,10 +54,10 @@ class BookRepository(MongoBaseRepo):
 
             return result_pagnition
         except Exception as e:
-            logging.error(f"Get List OCR Engine error -- Caused by '{e.__str__()}")
+            logging.error(f"Get List Book error -- Caused by '{e.__str__()}")
             return None
 
-    def get_all_book_repo(self, code_books: str, status_borrow: str = ""):
+    def get_all_book_repo(self, code_books: str, status_borrow: str):
         try:
             # init data
             total = 0
@@ -104,10 +104,18 @@ class BookRepository(MongoBaseRepo):
             "as": "books"
         }}
 
+        groups_lookup = {SYNTAS_LOOKUP: {
+            "from": "groups",
+            "localField": "books.group_code",
+            "foreignField": "group_code",
+            "as": "groups"
+        }}
+
         # build query
         querry_command = [
             book_match_id,
             books_lookup,
+            groups_lookup
         ]
 
         # get full result dict
@@ -120,6 +128,8 @@ class BookRepository(MongoBaseRepo):
     def _dict_to_detail_book_result(self, dict_book: dict):
         dict_object_id = mongo_utils.convert_object_id_to_string(dict_book)
         dict_object_id['books'] = dict_object_id.get('books')[0]
+        if len(dict_object_id['groups']) > 0:
+            dict_object_id['groups'] = dict_object_id.get('groups')[0]
         result = DetailBook(**dict_object_id)
         result.id = dict_object_id.get('_id')
         total_books_ready = self.get_all_book_repo(code_books=result.code_books, status_borrow="READY")
@@ -143,3 +153,47 @@ class BookRepository(MongoBaseRepo):
         if delete_result and delete_result.modified_count == 1:
             return True
         return False
+
+    def get_list_id_book_repo(self, size: int, filter_condition: dict):
+        try:
+            # Get list ocr_engine by condition
+            filter_condition.update(self._record_status_active)
+
+            filter_condition_new = {'$match': filter_condition}
+            size_aggregation = {'$limit': size}
+
+            books_lookup = {'$lookup': {
+                "from": "books",
+                "localField": "code_books",
+                "foreignField": "code",
+                "as": "books"
+            }}
+
+            # build query
+            querry_command = [
+                filter_condition_new,
+                size_aggregation,
+                books_lookup
+            ]
+
+            list_id_book_result_dict = list(self.book_collection.aggregate(querry_command))
+
+            if collection_utils.list_none_or_empty(list_id_book_result_dict):
+                list_id_book = []
+            else:
+                list_id_book = [self._dict_to_id_book(book) for book in list_id_book_result_dict]
+
+            return list_id_book
+        except Exception as e:
+            logging.error(f"Get List Book error -- Caused by '{e.__str__()}")
+            return None
+
+
+    def _dict_to_id_book(self, book: dict):
+        convert_dict = {
+            'code_id': book.get('code_id'),
+            'name_books': book.get('books')[0].get('name'),
+            'author':book.get('books')[0].get('author'),
+            'avatar': book.get('books')[0].get('avatar')
+        }
+        return convert_dict

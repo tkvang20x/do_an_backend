@@ -2,6 +2,7 @@ from typing import Optional
 
 from app.src.model.base.base_model import CustomBaseModel
 from app.src.model.books_model import DetailBooks, BooksFormInDB
+from app.src.model.group_books_model import GroupBooks
 
 
 class ListBook(CustomBaseModel):
@@ -29,6 +30,7 @@ class DetailBook(CustomBaseModel):
     status_borrow: Optional[str] = None
     user_borrow: Optional[str] = None
     qr_code_data: Optional[str] = None
+    groups: Optional[GroupBooks] = None
 
 
 class UpdateBook(CustomBaseModel):

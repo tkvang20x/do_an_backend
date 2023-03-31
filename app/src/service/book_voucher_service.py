@@ -23,6 +23,10 @@ class BookVoucherService(metaclass=Singleton):
 
     def create_voucher_service(self, data_create: VoucherCreate, user: str):
         try:
+            list_id_book = []
+            for item in data_create.books_borrowed:
+                list_id_book.append(item.code_id)
+            data_create.books_borrowed = list_id_book
             data_create_dict = data_create.dict()
             data_create_convert = VoucherDetail(**data_create_dict)
             # self.user_repo.get_detail_user_repo(code=data_create_convert.user_id)

@@ -54,8 +54,7 @@ class BooksService(metaclass=Singleton):
                        name: str,
                        code: str,
                        author: str,
-                       group_code: str
-                       ):
+                       group_code: str):
         try:
             filter_condition = self.build_filter_condition(name=name, code=code, author=author, group_code=group_code)
             list_book = self.books_repo.get_list_book_repo(page=page,

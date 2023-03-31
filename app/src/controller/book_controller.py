@@ -53,6 +53,23 @@ def get_list_book(request: Request,
                                 message=f"Get list books. - Caused by: [{error_message}]")
 
 
+@router.get(path="/book/listid/{code_books}", response_description="Get list book")
+def get_list_id_book(request: Request,
+                  code_books: str,
+                  size: int = 5,
+                  status_borrow: str = "READY"):
+    try:
+        response = book_service.get_list_id_book(size=size,
+                                                 code_books=code_books,
+                                                 status_borrow=status_borrow)
+        return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
+    except Exception as ex:
+        http_status, error_message = gen_exception_service(ex)
+        raise BusinessException(http_code=http_status,
+                                path=request.url.path,
+                                message=f"Get list books. - Caused by: [{error_message}]")
+
+
 @router.post(path="/book/create", response_description="Create new book")
 def create_book(request: Request, code_books: str, amount: int):
     try:

@@ -20,7 +20,8 @@ class DetailBooks(CustomBaseModel):
     publishing_year: Optional[str] = None
     origin: Optional[str] = None
     avatar: Optional[str] = None
-    amount: Optional[int] = 0
+    total_books: Optional[int] = 0
+    total_ready: Optional[int] = 0
     group_code: Optional[str] = None
     groups: Optional[GroupBooks] = None
 
@@ -30,7 +31,8 @@ class ListBook(CustomBaseModel):
     code: Optional[str] = None
     author: Optional[str] = None
     avatar: Optional[str] = None
-    total_books: Optional[int] = None
+    total_books: Optional[int] = 0
+    total_ready: Optional[int] = 0
     group_code: Optional[str] = None
     title: Optional[str] = None
     groups: Optional[GroupBooks] = None

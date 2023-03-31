@@ -41,6 +41,8 @@ class BooksRepository(MongoBaseRepo):
             dict_object_id['groups'] = dict_object_id.get('groups')[0]
         result = DetailBooks(**dict_object_id)
         result.id = dict_object_id.get('_id')
+        result.total_books = self.book_repository.get_all_book_repo(code_books=result.code, status_borrow="")
+        result.total_ready = self.book_repository.get_all_book_repo(code_books=result.code, status_borrow="READY")
         return result
 
     def get_list_book_repo(self, page: int,
@@ -123,7 +125,8 @@ class BooksRepository(MongoBaseRepo):
         else:
             dict_object_id['groups'] = None
         result = ListBook(**dict_object_id)
-        result.total_books = self.book_repository.get_all_book_repo(code_books=result.code)
+        result.total_books = self.book_repository.get_all_book_repo(code_books=result.code, status_borrow="")
+        result.total_ready = self.book_repository.get_all_book_repo(code_books=result.code, status_borrow="READY")
         return result
 
     def get_detail_book_repo(self, code: str):

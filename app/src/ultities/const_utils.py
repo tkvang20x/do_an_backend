@@ -9,6 +9,7 @@ class StatusBook(Enum):
 class StatusBorrow(Enum):
     BORROWING = 'BORROWING'
     READY = 'READY'
+    WAITING = 'WAITING'
 
 
 class StatusVoucher(Enum):

@@ -12,8 +12,15 @@ class BooksAmount(BaseModel):
     amount: Optional[int] = 0
 
 
+class BookInVoucher(BaseModel):
+    code_id: Optional[str] = None
+    name_books: Optional[str] = None
+    author: Optional[str] = None
+    avatar: Optional[str] = None
+
+
 class VoucherCreate(CustomBaseModel):
-    books_borrowed: Optional[List[str]] = None
+    books_borrowed: Optional[List[BookInVoucher]] = None
     due_date: Optional[str] = None
     user_id: Optional[str] = None
     description: Optional[str] = None

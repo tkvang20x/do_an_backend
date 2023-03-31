@@ -23,12 +23,13 @@ class BookService(metaclass=Singleton):
                       order_by: str,
                       order: int,
                       code_books: str,
-                      code_id:str,
+                      code_id: str,
                       status_book: str,
                       status_borrow: str,
                       user_borrow: str):
         try:
-            filter_condition = self.build_filter_condition(code_books=code_books,code_id=code_id, status_book=status_book,
+            filter_condition = self.build_filter_condition(code_books=code_books, code_id=code_id,
+                                                           status_book=status_book,
                                                            status_borrow=status_borrow, user_borrow=user_borrow)
             list_book = self.book_repo.get_list_book_repo(page=page,
                                                           size=size,
@@ -40,7 +41,8 @@ class BookService(metaclass=Singleton):
             http_status, error_message = gen_exception_service(ex)
             raise BusinessException(message=error_message, http_code=http_status)
 
-    def build_filter_condition(self, code_books: str,code_id:str, status_book: str, status_borrow: str, user_borrow: str):
+    def build_filter_condition(self, code_books: str, code_id: str, status_book: str, status_borrow: str,
+                               user_borrow: str):
         filter_condition = {'code_books': code_books}
         if code_id is not None and len(code_id.strip()) > 0:
             filter_condition.update({'code_id': mongo_utils.build_filter_like_keyword(code_id.strip())})
@@ -129,7 +131,7 @@ class BookService(metaclass=Singleton):
     def delete_book_service(self, code_id: str):
         try:
             self.get_detail_book_service(code_id=code_id.strip())
-            update_data = self.book_repo.delete_book_repo(code_id= code_id)
+            update_data = self.book_repo.delete_book_repo(code_id=code_id)
             if not update_data:
                 raise BusinessException(message=f'Delete book {code_id} remove fail!',
                                         http_code=status.HTTP_304_NOT_MODIFIED)
@@ -137,3 +139,28 @@ class BookService(metaclass=Singleton):
         except Exception as e:
             http_status, error_message = gen_exception_service(e)
             raise BusinessException(message=error_message, http_code=http_status)
+
+    def get_list_id_book(self, size: int, code_books: str, status_borrow: str):
+        try:
+            total_book_filter = self.book_repo.get_all_book_repo(code_books=code_books, status_borrow=status_borrow)
+            if size > total_book_filter:
+                raise BusinessException(message=f'Size > total book filter!',
+                                        http_code=status.HTTP_400_BAD_REQUEST)
+
+            filter_condition = self.build_filter_condition_2(code_books=code_books, status_borrow=status_borrow)
+
+            list_book = self.book_repo.get_list_id_book_repo(size=size,
+                                                             filter_condition=filter_condition)
+            for item in list_book:
+                self.book_repo.update_book_repo(code_id=item.get("code_id"), data_update=UpdateBook(user_borrow="",
+                                                                                                    status_borrow=const_utils.StatusBorrow.WAITING.value))
+            return list_book
+        except Exception as ex:
+            http_status, error_message = gen_exception_service(ex)
+            raise BusinessException(message=error_message, http_code=http_status)
+
+    def build_filter_condition_2(self, code_books: str, status_borrow: str):
+        filter_condition = {'code_books': code_books}
+        if status_borrow is not None and len(status_borrow.strip()) > 0:
+            filter_condition.update({'status_borrow': mongo_utils.build_filter_like_keyword(status_borrow.strip())})
+        return filter_condition
