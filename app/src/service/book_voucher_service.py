@@ -12,6 +12,7 @@ from app.src.repository.manager_repository import ManagerRepository
 from app.src.repository.user_repository import UserRepository
 from app.src.ultities import datetime_utils, const_utils, string_utils, mongo_utils
 from app.src.ultities.const_utils import StatusVoucher
+from app.src.service.change_password_service import ChangePasswordService
 
 
 class BookVoucherService(metaclass=Singleton):
@@ -20,6 +21,7 @@ class BookVoucherService(metaclass=Singleton):
         self.book_repo = BookRepository()
         self.voucher_repo = BookVoucherRepository()
         self.manager_repo = ManagerRepository()
+        self.change_pass_service = ChangePasswordService()
 
     def create_voucher_service(self, data_create: VoucherCreate, user: str):
         try:
@@ -40,13 +42,14 @@ class BookVoucherService(metaclass=Singleton):
             data_create_convert.modified_time = datetime_utils.get_string_datetime_now()
 
             user_result = self.user_repo.get_detail_user_repo(code=data_create_convert.user_id)
-            manager_result = self.manager_repo.get_detail_manager_repo(code=user)
+            # manager_result = self.manager_repo.get_detail_manager_repo(code=user)
 
             data_create_convert.user_name = user_result.user_name
+            data_create_convert.email_user = user_result.email
 
-            data_create_convert.manager_name = manager_result.user_name
-            data_create_convert.manager_id = manager_result.code
-            data_create_convert.created_by = manager_result.user_name
+            # data_create_convert.manager_name = manager_result.user_name
+            # data_create_convert.manager_id = manager_result.code
+            # data_create_convert.created_by = manager_result.user_name
 
             create_voucher_result = self.voucher_repo.create_voucher_repo(data_create=data_create_convert)
             if not create_voucher_result:
@@ -93,8 +96,8 @@ class BookVoucherService(metaclass=Singleton):
         if not string_utils.string_none_or_empty(voucher_id):
             filter_condition.update({'voucher_id': mongo_utils.build_filter_like_keyword(voucher_id.strip())})
         if not string_utils.string_none_or_empty(start_date) and not string_utils.string_none_or_empty(due_date):
-            filter_condition.update({"start_date": {"$gte": mongo_utils.build_filter_like_keyword(start_date.strip()),
-                                                    "$lt": mongo_utils.build_filter_like_keyword(due_date.strip())}})
+            filter_condition.update({"start_date": {"$gte": start_date.strip(),
+                                                    "$lt": due_date.strip()}})
         if not string_utils.string_none_or_empty(user_name):
             filter_condition.update({'user_name': mongo_utils.build_filter_like_keyword(user_name.strip())})
         if not string_utils.string_none_or_empty(status_voucher):
@@ -147,19 +150,35 @@ class BookVoucherService(metaclass=Singleton):
         status_update = ""
         try:
             voucher_detail = self.get_detail_voucher_service(voucher_id=voucher_id.strip())
-            if voucher_detail.status_voucher == StatusVoucher.WAITING_CONFIRM.value:
-                status_update = StatusVoucher.CONFIRMED.value
-            if voucher_detail.status_voucher == StatusVoucher.CONFIRMED.value:
-                status_update = StatusVoucher.PAYED.value
-            if voucher_detail.status_voucher == StatusVoucher.EXPIRED.value:
-                status_update = StatusVoucher.PAYED.value
-            if voucher_detail.status_voucher == StatusVoucher.PAYED.value:
-                status_update = StatusVoucher.PAYED.value
             if status_voucher == StatusVoucher.CANCELLED.value:
                 status_update = StatusVoucher.CANCELLED.value
+            else:
+                if voucher_detail.status_voucher == StatusVoucher.WAITING_CONFIRM.value:
+                    status_update = StatusVoucher.CONFIRMED.value
+                elif voucher_detail.status_voucher == StatusVoucher.CONFIRMED.value:
+                    status_update = StatusVoucher.PAYED.value
+                elif voucher_detail.status_voucher == StatusVoucher.EXPIRED.value:
+                    status_update = StatusVoucher.PAYED.value
+                elif voucher_detail.status_voucher == StatusVoucher.PAYED.value:
+                    status_update = StatusVoucher.PAYED.value
             update_data = self.voucher_repo.update_status_voucher_repo(voucher_id=voucher_id,
                                                                        status_update=status_update)
             return update_data
         except Exception as e:
             http_status, error_message = gen_exception_service(e)
             raise BusinessException(message=error_message, http_code=http_status)
+
+    def get_all_voucher_before_date_now(self):
+        filter_date = {}
+        date_now = datetime_utils.get_string_datetime_now()
+        if not string_utils.string_none_or_empty(date_now):
+            filter_date.update({"due_date": {"$lt": date_now.strip()},
+                                "status_voucher": const_utils.StatusVoucher.CONFIRMED.value
+                                })
+        list_voucher = self.voucher_repo.get_list_voucher_by_user_id_repo(page=1, size=0, order_by="created_time",
+                                                                          order=-1,
+                                                                          filter_condition=filter_date)
+        for item in list_voucher:
+            self.voucher_repo.update_status_voucher_repo(voucher_id=item.voucher_id,
+                                                         status_update=const_utils.StatusVoucher.EXPIRED.value)
+            self.change_pass_service.send_email_message_expired(email=item.email_user)

@@ -20,9 +20,10 @@ class UserService(metaclass=Singleton):
                       order_by: str,
                       order: int,
                       name: str,
-                      code: str, ):
+                      code: str,
+                      course: str):
         try:
-            filter_condition = self.build_filter_condition(name=name, code=code)
+            filter_condition = self.build_filter_condition(name=name, code=code, course=course)
             list_book = self.user_repo.get_list_user_repo(page=page,
                                                           size=size,
                                                           order_by=order_by,
@@ -33,15 +34,27 @@ class UserService(metaclass=Singleton):
             http_status, error_message = gen_exception_service(ex)
             raise BusinessException(message=error_message, http_code=http_status)
 
-    def build_filter_condition(self, name: str, code: str):
+    def build_filter_condition(self, name: str, code: str, course: str):
         filter_condition = {}
         if not string_utils.string_none_or_empty(name):
             filter_condition.update({'name': mongo_utils.build_filter_like_keyword(name.strip())})
         if not string_utils.string_none_or_empty(code):
             filter_condition.update({'code': code})
+        if not string_utils.string_none_or_empty(course):
+            filter_condition.update({'course': course})
         return filter_condition
 
     def create_user_service(self, data_create: CreateUser, user: ""):
+        if self.user_repo.check_user_name_user(user_name=data_create.user_name) is not None:
+            raise BusinessException(
+                message=f'User name existed!',
+                http_code=status.HTTP_200_OK)
+
+        if self.user_repo.check_email_user(data_create.email) is not None:
+            raise BusinessException(
+                message=f'Email existed!',
+                http_code=status.HTTP_200_OK)
+
         data_create_dict = data_create.dict()
         data_create = DetailUser(**data_create_dict)
         data_create.modified_time = datetime_utils.get_string_datetime_now()
@@ -52,6 +65,7 @@ class UserService(metaclass=Singleton):
         if not create_user_result:
             raise RuntimeError(f'Create new User error!')
         return create_user_result
+
 
     def get_detail_user_service(self, code: str):
         try:

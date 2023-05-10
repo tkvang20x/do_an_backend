@@ -44,56 +44,64 @@ class BookVoucherRepository(MongoBaseRepo):
                                          order: int,
                                          filter_condition: dict):
         try:
-            # init data
-            total = 0
-            total_page = 0
-            skip = (page - 1) * size
-            # build filter condition
-            # Get list ocr_engine by condition
-            filter_condition.update(self._record_status_active)
+            if size > 0:
+                skip = (page - 1) * size
+                filter_condition.update(self._record_status_active)
 
-            # filter_aggregation = {'$match': {'is_active': True}}
-            # sort_aggregation = {'$sort': {f'{order_by}': order}}
-            # skip_aggregation = {'$skip': skip}
-            # size_aggregation = {'$limit': size}
-            #
-            # # build query
-            # querry_command = [
-            #     filter_aggregation,
-            #     sort_aggregation,
-            #     skip_aggregation,
-            #     size_aggregation,
-            # ]
+                # filter_aggregation = {'$match': {'is_active': True}}
+                # sort_aggregation = {'$sort': {f'{order_by}': order}}
+                # skip_aggregation = {'$skip': skip}
+                # size_aggregation = {'$limit': size}
+                #
+                # # build query
+                # querry_command = [
+                #     filter_aggregation,
+                #     sort_aggregation,
+                #     skip_aggregation,
+                #     size_aggregation,
+                # ]
 
-            # get full result dict
-            # list_voucher_result_dict = list(self.voucher_collection.aggregate(querry_command))
+                # get full result dict
+                # list_voucher_result_dict = list(self.voucher_collection.aggregate(querry_command))
 
-            list_voucher_result_dict = list(
-                self.voucher_collection.find(filter_condition).sort([(order_by, order)]).skip(skip).limit(size))
-            if collection_utils.list_none_or_empty(list_voucher_result_dict):
-                list_voucher = []
-            else:
-                list_voucher = [self._dict_to_voucher_result(voucher) for voucher in
-                                list_voucher_result_dict]
+                list_voucher_result_dict = list(
+                    self.voucher_collection.find(filter_condition).sort([(order_by, order)]).skip(skip).limit(size))
+                if collection_utils.list_none_or_empty(list_voucher_result_dict):
+                    list_voucher = []
+                else:
+                    list_voucher = [self._dict_to_voucher_result(voucher) for voucher in
+                                    list_voucher_result_dict]
 
-            # count total
-            total = self.voucher_collection.count_documents(filter_condition)
-            # calculate total page
-            if not total or total == 0:
-                total_page = 0
-            else:
-                total_page = ((total + size - 1) // size)
-            result_pagnition = base_model.coor_response(response_data=list_voucher,
-                                                        page=page,
-                                                        limit=size,
-                                                        sort_by=order_by,
-                                                        sort=order,
-                                                        total_records=total,
-                                                        total_page=total_page)
+                # count total
+                total = self.voucher_collection.count_documents(filter_condition)
+                # calculate total page
+                if not total or total == 0:
+                    total_page = 0
+                else:
+                    total_page = ((total + size - 1) // size)
+                result_pagnition = base_model.coor_response(response_data=list_voucher,
+                                                            page=page,
+                                                            limit=size,
+                                                            sort_by=order_by,
+                                                            sort=order,
+                                                            total_records=total,
+                                                            total_page=total_page)
 
-            return result_pagnition
+                return result_pagnition
+            elif size == 0:
+                filter_condition.update(self._record_status_active)
+
+                list_voucher_result_dict = list(
+                    self.voucher_collection.find(filter_condition).sort([(order_by, order)]))
+                if collection_utils.list_none_or_empty(list_voucher_result_dict):
+                    list_voucher = []
+                else:
+                    list_voucher = [self._dict_to_voucher_result(voucher) for voucher in
+                                    list_voucher_result_dict]
+
+                return list_voucher
         except Exception as e:
-            logging.error(f"Get List OCR Engine error -- Caused by '{e.__str__()}")
+            logging.error(f"Get List Voucher error -- Caused by '{e.__str__()}")
             return None
 
     def get_detail_voucher_repo(self, voucher_id: str):

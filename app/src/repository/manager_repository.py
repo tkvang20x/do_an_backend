@@ -1,3 +1,4 @@
+import base64
 import logging
 
 from app.src.base.base_repository import MongoBaseRepo
@@ -15,10 +16,10 @@ class ManagerRepository(MongoBaseRepo):
         self._record_status_active = {'is_active': True}
 
     def get_list_manager_repo(self, page: int,
-                           size: int,
-                           order_by: str,
-                           order: int,
-                           filter_condition: dict):
+                              size: int,
+                              order_by: str,
+                              order: int,
+                              filter_condition: dict):
         try:
             # init data
             total = 0
@@ -101,7 +102,7 @@ class ManagerRepository(MongoBaseRepo):
         data_update['modified_time'] = datetime_utils.get_string_datetime_now()
         code = code.strip()
         _update_result = self.manager_collection.update_one({'code': code},
-                                                         {'$set': data_update})
+                                                            {'$set': data_update})
         if _update_result and _update_result.modified_count == 1:
             book_result_dict = self.get_detail_manager_repo(code=code)
             return book_result_dict
@@ -109,7 +110,7 @@ class ManagerRepository(MongoBaseRepo):
 
     def delete_manager_repo(self, code: str):
         delete_result = self.manager_collection.update_one({'code': code.strip()},
-                                                        {'$set': {'is_active': False}})
+                                                           {'$set': {'is_active': False}})
         if delete_result and delete_result.modified_count == 1:
             return True
         return False
@@ -117,7 +118,25 @@ class ManagerRepository(MongoBaseRepo):
     def update_avatar_manager_repo(self, code: str, path_avatar: str):
         code = code.strip()
         _update_result = self.manager_collection.update_one({'code': code},
-                                                         {'$set': {'avatar': path_avatar}})
+                                                            {'$set': {'avatar': path_avatar}})
         if _update_result and _update_result.modified_count == 1:
             return True
         return False
+
+    def update_password_manager(self, code: str, new_pass: str):
+        code = code.strip()
+        new_pass_convert = base64.b64encode(bytes(new_pass, 'utf-8')).decode('utf-8')
+        update_pass = self.manager_collection.update_one({'code': code},
+                                                         {'$set': {'password': new_pass_convert}}
+                                                         )
+        if update_pass and update_pass.modified_count == 1:
+            return True
+        return False
+
+    def check_email_manager(self, email: str):
+        email = email.strip()
+        manager_result = self.manager_collection.find_one({"email": email, 'is_active': True})
+        if not manager_result:
+            return None
+        manager_result_dict = self._dict_to_create_manager_result(manager_result)
+        return manager_result_dict

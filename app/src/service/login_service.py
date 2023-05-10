@@ -1,3 +1,5 @@
+import base64
+
 from starlette import status
 
 from app.src.base.base_exception import BusinessException
@@ -34,13 +36,14 @@ class LoginService(metaclass=Singleton):
 
     def login_user(self, data_login: LoginRequest):
         check_username = self.user_repo.check_user_name_user(user_name=data_login.username)
-        if not check_username:
-            raise BusinessException(message=f'User name {data_login.username} not exist!',
-                                    http_code=status.HTTP_404_NOT_FOUND)
 
-        if not data_login.password == check_username.password:
+        if not check_username:
+            raise BusinessException(message=f'User name not exist!',
+                                    http_code=status.HTTP_200_OK)
+        password = base64.b64decode(check_username.password).decode('utf-8')
+        if not data_login.password == password:
             raise BusinessException(message=f'PASSWORD INCORRECT !!!',
-                                    http_code=status.HTTP_400_BAD_REQUEST)
+                                    http_code=status.HTTP_200_OK)
 
         response = generate_token(check_username.user_name, check_username.code, check_username.role)
         response = {
@@ -51,10 +54,11 @@ class LoginService(metaclass=Singleton):
     def login_manager(self, data_login: LoginRequest):
         check_username = self.manager_repo.check_user_name_manager(user_name=data_login.username)
         if not check_username:
-            raise BusinessException(message=f'User name {data_login.username} not exist!',
+            raise BusinessException(message=f'User name not exist!',
                                     http_code=status.HTTP_404_NOT_FOUND)
 
-        if not data_login.password == check_username.password:
+        password = base64.b64decode(check_username.password).decode('utf-8')
+        if not data_login.password == password:
             raise BusinessException(message=f'PASSWORD INCORRECT !!!',
                                     http_code=status.HTTP_400_BAD_REQUEST)
 

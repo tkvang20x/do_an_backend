@@ -1,3 +1,4 @@
+import json
 from typing import Optional
 
 from pydantic import BaseModel, validator
@@ -17,6 +18,8 @@ class CreateUser(CustomBaseModel):
     user_name: Optional[str] = None
     password: Optional[str] = None
     role: Optional[str] = "USER"
+    avatar: Optional[str] = None
+
 
     @validator('name', pre=True)
     def check_name(cls, value):

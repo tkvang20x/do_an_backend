@@ -23,7 +23,7 @@ def login(request: Request, login: LoginRequest):
         http_status, error_message = gen_exception_service(ex)
         raise BusinessException(http_code=http_status,
                                 path=request.url.path,
-                                message=f"LOGIN FAIL- {error_message}!")
+                                message=f"LOGIN FAIL- {error_message}")
 
 
 @router.post('/login/manager')

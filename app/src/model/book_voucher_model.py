@@ -36,6 +36,7 @@ class VoucherDetail(CustomBaseModel):
     status_voucher: Optional[str] = None
     description: Optional[str] = None
     user_name: Optional[str] = None
+    email_user: Optional[str] = None
     manager_name: Optional[str] = None
 
 
@@ -60,5 +61,6 @@ class VoucherUpdate(CustomBaseModel):
     user_id: Optional[str] = None
 
 
-class StatusVoucher(BaseModel):
+class StatusVoucherUpdate(BaseModel):
     status_update: Optional[str] = None
+    # user_name: Optional[str] = None

@@ -99,8 +99,8 @@ def delete_manager(request: Request, code: str):
                                 message=f"Delete user error. - Caused by: [{error_message}]")
 
 
-@router.put(path="/managers/{code}/avatar", response_description="Update avatar user")
-async def update_manager(request: Request, code: str, avatar: UploadFile = File(...)):
+@router.put(path="/managers/avatar/{code}", response_description="Update avatar user")
+async def update_avatar_manager(request: Request, code: str, avatar: UploadFile = File(...)):
     try:
         response = await manager_service.update_avatar_manager_service(code=code, avatar=avatar, path_folder=BASEDIR)
         return ResponseCommon().data(result=response, status=status.HTTP_200_OK, path=request.url.path)

@@ -1,7 +1,7 @@
 import os
 import types
 
-from fastapi import APIRouter, Request, Query, UploadFile, File, Depends
+from fastapi import APIRouter, Request, Query, UploadFile, File, Depends, Form
 from starlette import status
 from starlette.staticfiles import StaticFiles
 
@@ -30,14 +30,16 @@ def get_list_users(request: Request,
                                          enum=["modified_time", "created_time", "name"]),
                    order: int = Query(default=-1, enum=[-1, 1]),
                    name: str = None,
-                   code: str = None):
+                   code: str = None,
+                   course: str = None):
     try:
         response = user_service.get_list_user(page=page,
                                               size=size,
                                               order_by=order_by,
                                               order=order,
                                               name=name,
-                                              code=code)
+                                              code=code,
+                                              course=course)
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)

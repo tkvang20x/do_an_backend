@@ -1,3 +1,4 @@
+import base64
 import logging
 
 from app.src.base.base_repository import MongoBaseRepo
@@ -121,3 +122,21 @@ class UserRepository(MongoBaseRepo):
         if _update_result and _update_result.modified_count == 1:
             return True
         return False
+
+    def update_password_user(self, code: str, new_pass: str):
+        code = code.strip()
+        new_pass_convert = base64.b64encode(bytes(new_pass,'utf-8')).decode('utf-8')
+        update_pass = self.user_collection.update_one({'code': code},
+                                                      {'$set': {'password': new_pass_convert}}
+                                                      )
+        if update_pass and update_pass.modified_count == 1:
+            return True
+        return False
+
+    def check_email_user(self, email: str):
+        email = email.strip()
+        user_result = self.user_collection.find_one({"email": email, 'is_active': True})
+        if not user_result:
+            return None
+        user_result_dict = self._dict_to_create_user_result(user_result)
+        return user_result_dict

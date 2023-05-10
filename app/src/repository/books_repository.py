@@ -51,9 +51,6 @@ class BooksRepository(MongoBaseRepo):
                            order: int,
                            filter_condition: dict):
         try:
-            # init data
-            total = 0
-            total_page = 0
             skip = (page - 1) * size
             # build filter condition
             filter_condition_count_document = {}

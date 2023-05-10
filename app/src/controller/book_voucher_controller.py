@@ -7,7 +7,7 @@ from starlette import status
 from app.src.base.base_exception import BusinessException, gen_exception_service
 from app.src.base.base_model import ResponseCommon
 from app.src.base.base_service import BaseRoute
-from app.src.model.book_voucher_model import VoucherCreate, VoucherUpdate, StatusVoucher
+from app.src.model.book_voucher_model import VoucherCreate, VoucherUpdate, StatusVoucherUpdate
 from app.src.service.book_voucher_service import BookVoucherService
 from app.src.ultities.token_utils import validate_token
 
@@ -87,7 +87,7 @@ def update_voucher(request: Request, voucher_id: str, data_update: VoucherUpdate
 
 
 @router.put(path="/voucher/{voucher_id}/status", response_description="Update status voucher")
-def update_status_voucher(request: Request, voucher_id: str, status_update: StatusVoucher):
+def update_status_voucher(request: Request, voucher_id: str, status_update: StatusVoucherUpdate):
     try:
         response = voucher_service.update_status_voucher_service(voucher_id=voucher_id,
                                                                  status_voucher=status_update.status_update)
