@@ -81,21 +81,29 @@ class UserRepository(MongoBaseRepo):
         result_user = ListUser(**user_convert_string)
         return result_user
 
-    def get_detail_user_repo(self, code: str):
-        code = code.strip()
-        user_result = self.user_collection.find_one({"code": code, 'is_active': True})
+    def check_exist_value_in_db(self, field: str, value: str):
+        value = value.strip()
+        user_result = self.user_collection.find_one({f'{field}': value, 'is_active': True})
         if not user_result:
             return None
         user_result_dict = self._dict_to_create_user_result(user_result)
         return user_result_dict
 
-    def check_user_name_user(self, user_name: str):
-        user_name = user_name.strip()
-        user_result = self.user_collection.find_one({"user_name": user_name, 'is_active': True})
-        if not user_result:
-            return None
-        user_result_dict = self._dict_to_create_user_result(user_result)
-        return user_result_dict
+    # def get_detail_user_repo(self, code: str):
+    #     code = code.strip()
+    #     user_result = self.user_collection.find_one({"code": code, 'is_active': True})
+    #     if not user_result:
+    #         return None
+    #     user_result_dict = self._dict_to_create_user_result(user_result)
+    #     return user_result_dict
+
+    # def check_user_name_user(self, user_name: str):
+    #     user_name = user_name.strip()
+    #     user_result = self.user_collection.find_one({"user_name": user_name, 'is_active': True})
+    #     if not user_result:
+    #         return None
+    #     user_result_dict = self._dict_to_create_user_result(user_result)
+    #     return user_result_dict
 
     def update_user_repo(self, code: str, data_update: UpdateUser):
         data_update = data_update.dict()
@@ -133,10 +141,10 @@ class UserRepository(MongoBaseRepo):
             return True
         return False
 
-    def check_email_user(self, email: str):
-        email = email.strip()
-        user_result = self.user_collection.find_one({"email": email, 'is_active': True})
-        if not user_result:
-            return None
-        user_result_dict = self._dict_to_create_user_result(user_result)
-        return user_result_dict
+    # def check_email_user(self, email: str):
+    #     email = email.strip()
+    #     user_result = self.user_collection.find_one({"email": email, 'is_active': True})
+    #     if not user_result:
+    #         return None
+    #     user_result_dict = self._dict_to_create_user_result(user_result)
+    #     return user_result_dict

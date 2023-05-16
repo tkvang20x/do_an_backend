@@ -77,7 +77,8 @@ def get_detail_voucher(request: Request, voucher_id: str):
 @router.put(path="/voucher/{voucher_id}", response_description="Update voucher")
 def update_voucher(request: Request, voucher_id: str, data_update: VoucherUpdate, user=Depends(validate_token)):
     try:
-        response = voucher_service.update_voucher_service(voucher_id=voucher_id, data_update=data_update, user=user.get('code'))
+        response = voucher_service.update_voucher_service(voucher_id=voucher_id, data_update=data_update,
+                                                          user=user.get('code'))
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)
@@ -109,3 +110,15 @@ def delete_voucher(request: Request, voucher_id: str):
         raise BusinessException(http_code=http_status,
                                 path=request.url.path,
                                 message=f"Delete book error. - Caused by: [{error_message}]")
+
+
+@router.get(path="/voucher-thongke1", response_description="Get list voucher")
+def get_list_voucher_for_thong_ke(request: Request, month: str, year: str):
+    try:
+        response = voucher_service.get_list_voucher_for_thong_ke_1_month(month=month, year=year)
+        return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
+    except Exception as ex:
+        http_status, error_message = gen_exception_service(ex)
+        raise BusinessException(http_code=http_status,
+                                path=request.url.path,
+                                message=f"Get list books. - Caused by: [{error_message}]")

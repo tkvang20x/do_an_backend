@@ -21,9 +21,9 @@ class UserService(metaclass=Singleton):
                       order: int,
                       name: str,
                       code: str,
-                      course: str):
+                      role: str):
         try:
-            filter_condition = self.build_filter_condition(name=name, code=code, course=course)
+            filter_condition = self.build_filter_condition(name=name, code=code, role=role)
             list_book = self.user_repo.get_list_user_repo(page=page,
                                                           size=size,
                                                           order_by=order_by,
@@ -34,25 +34,29 @@ class UserService(metaclass=Singleton):
             http_status, error_message = gen_exception_service(ex)
             raise BusinessException(message=error_message, http_code=http_status)
 
-    def build_filter_condition(self, name: str, code: str, course: str):
+    def build_filter_condition(self, name: str, code: str, role: str):
         filter_condition = {}
         if not string_utils.string_none_or_empty(name):
             filter_condition.update({'name': mongo_utils.build_filter_like_keyword(name.strip())})
         if not string_utils.string_none_or_empty(code):
             filter_condition.update({'code': code})
-        if not string_utils.string_none_or_empty(course):
-            filter_condition.update({'course': course})
+        if not string_utils.string_none_or_empty(role):
+            filter_condition.update({'role': role})
         return filter_condition
 
     def create_user_service(self, data_create: CreateUser, user: ""):
-        if self.user_repo.check_user_name_user(user_name=data_create.user_name) is not None:
+        if self.user_repo.check_exist_value_in_db(field="user_name", value=data_create.user_name) is not None:
             raise BusinessException(
                 message=f'User name existed!',
                 http_code=status.HTTP_200_OK)
 
-        if self.user_repo.check_email_user(data_create.email) is not None:
+        if self.user_repo.check_exist_value_in_db(field="email", value=data_create.email) is not None:
             raise BusinessException(
                 message=f'Email existed!',
+                http_code=status.HTTP_200_OK)
+        if self.user_repo.check_exist_value_in_db(field="code", value=data_create.code) is not None:
+            raise BusinessException(
+                message=f'Code existed!',
                 http_code=status.HTTP_200_OK)
 
         data_create_dict = data_create.dict()
@@ -60,7 +64,7 @@ class UserService(metaclass=Singleton):
         data_create.modified_time = datetime_utils.get_string_datetime_now()
         data_create.created_time = datetime_utils.get_string_datetime_now()
         data_create.created_by = user
-        data_create.code = "USER_" + str(datetime_utils.get_timestamp_now())
+        # data_create.code = "USER_" + str(datetime_utils.get_timestamp_now())
         create_user_result = self.user_repo.create_user_repo(data_create=data_create)
         if not create_user_result:
             raise RuntimeError(f'Create new User error!')
@@ -69,7 +73,7 @@ class UserService(metaclass=Singleton):
 
     def get_detail_user_service(self, code: str):
         try:
-            user_data = self.user_repo.get_detail_user_repo(code=code)
+            user_data = self.user_repo.check_exist_value_in_db(field="code", value=code)
             if not user_data:
                 raise BusinessException(message=f'User by code [{code}] not exist!',
                                         http_code=status.HTTP_404_NOT_FOUND)

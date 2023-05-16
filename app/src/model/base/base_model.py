@@ -37,15 +37,15 @@ def check_bound_number(name: str, value: int, min_number: Optional[int], max_num
 
 
 def check_length_string(name: str, value: str, max_length: int, message_title: str, min_length: Optional[int] = 1):
-    if len(value.strip()) == 0:
-        raise BusinessException(http_code=status.HTTP_400_BAD_REQUEST,
-                                message=f"{message_title} error. - Caused by: [ {name.upper()} must not character! ]")
+    # if len(value.strip()) == 0:
+    #     raise BusinessException(http_code=status.HTTP_400_BAD_REQUEST,
+    #                             message=f"{message_title} error. - Caused by: [ {name.upper()} must not character! ]")
     if len(value) > max_length:
         raise BusinessException(http_code=status.HTTP_400_BAD_REQUEST,
                                 message=f"{message_title} error. - Caused by: [ {name.upper()} max length {max_length}! ]")
-    if len(value) < min_length:
-        raise BusinessException(http_code=status.HTTP_400_BAD_REQUEST,
-                                message=f"{message_title} error. - Caused by: [ {name.upper()} min length {min_length}! ]")
+    # if len(value) < min_length:
+    #     raise BusinessException(http_code=status.HTTP_400_BAD_REQUEST,
+    #                             message=f"{message_title} error. - Caused by: [ {name.upper()} min length {min_length}! ]")
     if not re.match(REGEX_STRING, value):
         raise BusinessException(http_code=status.HTTP_400_BAD_REQUEST,
                                 message=f"{message_title} error. - Caused by: [ Field {name.upper()} does not contain html! ]")

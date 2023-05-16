@@ -31,7 +31,7 @@ def get_list_users(request: Request,
                    order: int = Query(default=-1, enum=[-1, 1]),
                    name: str = None,
                    code: str = None,
-                   course: str = None):
+                   role: str = None):
     try:
         response = user_service.get_list_user(page=page,
                                               size=size,
@@ -39,7 +39,7 @@ def get_list_users(request: Request,
                                               order=order,
                                               name=name,
                                               code=code,
-                                              course=course)
+                                              role=role)
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)

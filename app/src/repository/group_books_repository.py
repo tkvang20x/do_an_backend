@@ -32,29 +32,56 @@ class GroupBooksRepository(MongoBaseRepo):
         result = GroupBooks(**dict_object_id)
         return result
 
-    def get_list_group_repo(self):
+    def get_list_group_repo(self, page: int,
+                            size: int,
+                            order_by: str,
+                            order: int,
+                            filter_condition: dict):
         try:
-            # init data
-            total = 0
-            filter_condition = {}
-            # build filter condition
-            # Get list ocr_engine by condition
-            filter_condition.update(self._record_status_active)
-            list_group_result_dict = list(
-                self.group_collection.find(filter_condition))
-            if collection_utils.list_none_or_empty(list_group_result_dict):
-                list_book = []
-            else:
-                list_book = [self._dict_to_group_result(book) for book in
-                             list_group_result_dict]
+            if size > 0:
+                # init data
+                skip = (page - 1) * size
+                # build filter condition
 
-            # count total
-            total = self.group_collection.count_documents(filter_condition)
-            # calculate total page
-            result_pagnition = base_model.coor_response(response_data=list_book,
-                                                        total_records=total)
+                filter_condition.update(self._record_status_active)
+                list_group_result_dict = list(
+                    self.group_collection.find(filter_condition).sort([(order_by, order)]).skip(skip).limit(size))
+                if collection_utils.list_none_or_empty(list_group_result_dict):
+                    list_book = []
+                else:
+                    list_book = [self._dict_to_group_result(book) for book in
+                                 list_group_result_dict]
 
-            return result_pagnition
+                # count total
+                total = self.group_collection.count_documents(filter_condition)
+                # calculate total page
+                if not total or total == 0:
+                    total_page = 0
+                else:
+                    total_page = ((total + size - 1) // size)
+                # calculate total page
+                result_pagnition = base_model.coor_response(response_data=list_book,
+                                                            page=page,
+                                                            limit=size,
+                                                            sort_by=order_by,
+                                                            sort=order,
+                                                            total_records=total,
+                                                            total_page=total_page)
+
+                return result_pagnition
+
+            elif size == 0:
+                filter_condition.update(self._record_status_active)
+
+                list_group_result_dict = list(
+                    self.group_collection.find(filter_condition).sort([(order_by, order)]))
+                if collection_utils.list_none_or_empty(list_group_result_dict):
+                    list_book = []
+                else:
+                    list_book = [self._dict_to_group_result(book) for book in
+                                 list_group_result_dict]
+
+                return list_book
         except Exception as e:
             logging.error(f"Get Size Book error -- Caused by '{e.__str__()}")
             return None

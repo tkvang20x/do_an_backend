@@ -5,7 +5,7 @@ from app.src.base.base_service import Singleton
 from app.src.model.group_books_model import GroupBooks, GroupBooksUpdate
 from app.src.repository.books_repository import BooksRepository
 from app.src.repository.group_books_repository import GroupBooksRepository
-from app.src.ultities import datetime_utils
+from app.src.ultities import datetime_utils, string_utils, mongo_utils
 
 
 class GroupBooksService(metaclass=Singleton):
@@ -27,9 +27,21 @@ class GroupBooksService(metaclass=Singleton):
             http_status, error_message = gen_exception_service(ex)
             raise BusinessException(message=error_message, http_code=http_status)
 
-    def get_list_group_books(self):
+    def get_list_group_books(self, page: int,
+                      size: int,
+                      order_by: str,
+                      order: int,
+                      group_name: str):
         try:
-            list_book = self.group_repo.get_list_group_repo()
+            filter_condition = {}
+            if not string_utils.string_none_or_empty(group_name):
+                filter_condition.update({'group_name': mongo_utils.build_filter_like_keyword(group_name.strip())})
+
+            list_book = self.group_repo.get_list_group_repo(page=page,
+                                                          size=size,
+                                                          order_by=order_by,
+                                                          order=order,
+                                                          filter_condition=filter_condition)
             return list_book
         except Exception as ex:
             http_status, error_message = gen_exception_service(ex)

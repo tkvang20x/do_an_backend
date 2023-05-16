@@ -1,3 +1,4 @@
+from builtins import set
 from datetime import datetime
 
 from starlette import status
@@ -41,7 +42,7 @@ class BookVoucherService(metaclass=Singleton):
             data_create_convert.status_voucher = const_utils.StatusVoucher.WAITING_CONFIRM.value
             data_create_convert.modified_time = datetime_utils.get_string_datetime_now()
 
-            user_result = self.user_repo.get_detail_user_repo(code=data_create_convert.user_id)
+            user_result = self.user_repo.check_exist_value_in_db(field="code",value=data_create_convert.user_id)
             # manager_result = self.manager_repo.get_detail_manager_repo(code=user)
 
             data_create_convert.user_name = user_result.user_name
@@ -181,4 +182,62 @@ class BookVoucherService(metaclass=Singleton):
         for item in list_voucher:
             self.voucher_repo.update_status_voucher_repo(voucher_id=item.voucher_id,
                                                          status_update=const_utils.StatusVoucher.EXPIRED.value)
-            self.change_pass_service.send_email_message_expired(email=item.email_user)
+            self.change_pass_service.send_email_message_expired(email=item.email_user, voucher_id=item.voucher_id)
+
+    def get_list_voucher_for_thong_ke_1_month(self, month: str, year: str):
+        try:
+            filter_condition = {}
+
+            date_end = datetime_utils.get_month_before_month_now(month=month)
+            # year = datetime.now().year
+            #
+            # month_filter = month_now - month_amount
+            # if month_filter == 0:
+            #     month_filter = 12
+            #     year = year - 1
+            # elif 10 > month_filter > 0:
+            #     month_filter = f'0{month_filter}'
+            # filter_condition.update({"start_date": f'{year}-{month_filter}-01-00:00:00',
+            #                          "due_date": f'{year}-{month_filter}-{date_end}-23:59:59'})
+
+            filter_condition.update({"created_time": {"$gte": f'{year}-{month}-01-00:00:00',
+                                                      "$lt": f'{year}-{month}-{date_end}-23:59:59'}})
+
+            list_voucher = self.voucher_repo.get_list_voucher_by_user_id_repo(page=1,size=0,order_by='created_time',order=-1,filter_condition=filter_condition)
+
+            list_books_count = []
+
+            for item in list_voucher:
+                for book in item.books_borrowed:
+                    # if len(list_books_count) == 0:
+                    #     list_books_count.append({
+                    #         'code_books': book.get('code_books'),
+                    #         'count': 1
+                    #     })
+                    if book.code_books not in [books.get('code_books') for books in list_books_count]:
+                        list_books_count.append({
+                            'code_books': book.code_books,
+                            'name': book.books.name,
+                            'author': book.books.author,
+                            'count': 1
+                        })
+                    else:
+                        for books in list_books_count:
+                            if books.get('code_books') == book.code_books:
+                                books.update({'count': books.get('count') + 1})
+
+            total_voucher, total_waiting, total_confirm, total_payed, total_expired, total_cancel = self.voucher_repo.get_list_voucher_for_thong_ke_1_month(
+                filter_condition=filter_condition)
+
+            return {"total_voucher": total_voucher,
+                    "total_waiting": total_waiting,
+                    "total_confirm": total_confirm,
+                    "total_payed": total_payed,
+                    "total_expired": total_expired,
+                    "total_cancel": total_cancel,
+                    "list_books_count": list_books_count
+                    }
+
+        except Exception as ex:
+            http_status, error_message = gen_exception_service(ex)
+            raise BusinessException(message=error_message, http_code=http_status)

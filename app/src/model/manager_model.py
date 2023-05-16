@@ -10,7 +10,6 @@ class CreateManager(CustomBaseModel):
     name: Optional[str] = None
     date_of_birth: Optional[str] = None
     gender: Optional[str] = None
-    course: Optional[str] = None
     university: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None
@@ -34,11 +33,6 @@ class CreateManager(CustomBaseModel):
                             message_title="USER MODEL")
         return value
 
-    @validator('course', pre=True)
-    def check_course(cls, value):
-        check_length_string(name="course", value=value, max_length=10,
-                            message_title="USER MODEL")
-        return value
 
     @validator('university', pre=True)
     def check_university(cls, value):
@@ -77,7 +71,6 @@ class DetailManager(CustomBaseModel):
     code: Optional[str] = None
     date_of_birth: Optional[str] = None
     gender: Optional[str] = None
-    course: Optional[str] = None
     university: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None
@@ -92,15 +85,14 @@ class ListManager(CustomBaseModel):
     code: Optional[str] = None
     date_of_birth: Optional[str] = None
     gender: Optional[str] = None
-    course: Optional[str] = None
     avatar: Optional[str] = None
+    user_name: Optional[str] = None
 
 
 class UpdateManager(BaseModel):
     name: Optional[str] = None
     date_of_birth: Optional[str] = None
     gender: Optional[str] = None
-    course: Optional[str] = None
     university: Optional[str] = None
     phone: Optional[str] = None
     email: Optional[str] = None

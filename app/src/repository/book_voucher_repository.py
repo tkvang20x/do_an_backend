@@ -4,7 +4,7 @@ from app.src.base.base_repository import MongoBaseRepo
 from app.src.model.base import base_model
 from app.src.model.book_voucher_model import VoucherCreate, VoucherDetail, VoucherDetailOutDB, VoucherUpdate
 from app.src.repository.book_repository import BookRepository
-from app.src.ultities import mongo_utils, collection_utils, datetime_utils
+from app.src.ultities import mongo_utils, collection_utils, datetime_utils, const_utils
 
 VOUCHER_COLLECTION = 'voucher'
 
@@ -136,7 +136,8 @@ class BookVoucherRepository(MongoBaseRepo):
 
     def _dict_to_voucher_detail_result(self, voucher_dict: dict):
         dict_object_id = mongo_utils.convert_object_id_to_string(voucher_dict)
-        dict_object_id['users'] = dict_object_id.get('users')[0]
+        if len(dict_object_id.get('users')) > 0:
+            dict_object_id['users'] = dict_object_id.get('users')[0]
         result = VoucherDetailOutDB(**dict_object_id)
         for i in range(len(result.books_borrowed)):
             book_data = self.book_repo.get_detail_book_repo(result.books_borrowed[i])
@@ -175,3 +176,33 @@ class BookVoucherRepository(MongoBaseRepo):
             book_result_dict = self.get_detail_voucher_repo(voucher_id=voucher_id)
             return book_result_dict
         return None
+
+    def get_list_voucher_for_thong_ke_1_month(self, filter_condition: dict):
+        try:
+            # count total
+            total = self.voucher_collection.count_documents(filter_condition)
+
+            filter_voucher_waiting = filter_condition
+            filter_voucher_waiting.update({"status_voucher": const_utils.StatusVoucher.WAITING_CONFIRM.value})
+            total_waiting = self.voucher_collection.count_documents(filter_voucher_waiting)
+
+            filter_voucher_confirm = filter_condition
+            filter_voucher_confirm.update({"status_voucher": const_utils.StatusVoucher.CONFIRMED.value})
+            total_confirm = self.voucher_collection.count_documents(filter_voucher_confirm)
+
+            filter_voucher_payed = filter_condition
+            filter_voucher_payed.update({"status_voucher": const_utils.StatusVoucher.PAYED.value})
+            total_payed = self.voucher_collection.count_documents(filter_voucher_payed)
+
+            filter_voucher_expired = filter_condition
+            filter_voucher_expired.update({"status_voucher": const_utils.StatusVoucher.EXPIRED.value})
+            total_expired = self.voucher_collection.count_documents(filter_voucher_expired)
+
+            filter_voucher_cancelled = filter_condition
+            filter_voucher_cancelled.update({"status_voucher": const_utils.StatusVoucher.CANCELLED.value})
+            total_cancel = self.voucher_collection.count_documents(filter_voucher_cancelled)
+
+            return total, total_waiting, total_confirm, total_payed, total_expired, total_cancel
+        except Exception as e:
+            logging.error(f"Get List Voucher error -- Caused by '{e.__str__()}")
+            return None

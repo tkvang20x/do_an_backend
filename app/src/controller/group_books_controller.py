@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Form, Query
 from starlette import status
 
 from app.src.base.base_exception import gen_exception_service, BusinessException
@@ -15,9 +15,19 @@ group_service = GroupBooksService()
 
 
 @router.get(path="/groups", response_description="Get list group books")
-def get_list_book(request: Request):
+def get_list_book(request: Request,
+                  page: int = 1,
+                  size: int = 10,
+                  order_by: str = Query(default="modified_time",
+                                        enum=["modified_time", "created_time", "group_name"]),
+                  order: int = Query(default=-1, enum=[-1, 1]),
+                  group_name: str = None):
     try:
-        response = group_service.get_list_group_books()
+        response = group_service.get_list_group_books(page=page,
+                                                      size=size,
+                                                      order_by=order_by,
+                                                      order=order,
+                                                      group_name=group_name, )
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)
@@ -39,7 +49,7 @@ def create_group(request: Request, data_create: GroupBooks):
 
 
 @router.put(path="/groups/{group_code}", response_description="Update group books")
-def update_group_books(request: Request, group_code: str, data_update: GroupBooksUpdate):
+def update_group_books(request: Request, group_code: str, data_update: GroupBooksUpdate = Form(...)):
     try:
         response = group_service.update_group_service(group_code=group_code, data_update=data_update)
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
@@ -60,5 +70,3 @@ def delete_group_books(request: Request, group_code: str):
         raise BusinessException(http_code=http_status,
                                 path=request.url.path,
                                 message=f"Delete book error. - Caused by: [{error_message}]")
-
-

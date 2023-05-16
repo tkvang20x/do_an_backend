@@ -23,7 +23,7 @@ class ChangePasswordService(metaclass=Singleton):
                 raise BusinessException(message=f'Password must not blank!',
                                         http_code=status.HTTP_400_BAD_REQUEST)
             if role == "USER":
-                user_result = self.user_repo.check_user_name_user(user_name=username.strip())
+                user_result = self.user_repo.check_exist_value_in_db(field="user_name", value=username.strip())
                 check_password = self.check_password(pass_input=old_pass,
                                                      old_pass=base64.b64decode(user_result.password).decode('utf-8'))
                 if not check_password:
@@ -47,8 +47,8 @@ class ChangePasswordService(metaclass=Singleton):
 
     def forgot_password_service(self, email: str, role: str):
         try:
-            if role == "USER":
-                user_result = self.user_repo.check_email_user(email=email)
+            if role != "MANAGER":
+                user_result = self.user_repo.check_exist_value_in_db(field="email", value=email)
                 if user_result:
                     code = self.send_email_service(email=email)
                     self.user_repo.update_password_user(code=user_result.code, new_pass=code)
@@ -93,14 +93,14 @@ class ChangePasswordService(metaclass=Singleton):
         # Trả về mã xác nhận để sử dụng ở hàm khác
         return code
 
-    def send_email_message_expired(self, email: str):
+    def send_email_message_expired(self, email: str, voucher_id: str):
         message = MIMEMultipart()
         message['From'] = 'kienlt20072000@gmail.com'
         message['To'] = email
         message['Subject'] = 'Thông báo v/v hết hạn phiếu mượn Thư viện HV KT Mật Mã'
 
         # code = ''.join([str(random.randint(0, 9)) for _ in range(6)])
-        text = f'Bạn có phiếu mượn sách của thư viện HV KT Mật Mã đã đến hạn trả, vui lòng đăng nhập để xem thông tin ' \
+        text = f'Bạn có phiếu mượn sách có mã là {voucher_id} của thư viện HV KT Mật Mã đã đến hạn trả, vui lòng đăng nhập để xem thông tin ' \
                f'chi tiết phiếu mượn đến hạn trả và trả sách vào thời gian sớm nhất cho thư viện'
         message.attach(MIMEText(text))
 

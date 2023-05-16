@@ -20,6 +20,18 @@ def get_string_datetime_now():
     return datetime.today().strftime(DATETIME_PATTERN)
 
 
+def get_month_before_month_now(month):
+    date_end = '28'
+    if month == '01' or month == '03' or month == '05' or month == '07' or month == '08' or month == '10' or month == '12':
+        date_end = '31'
+        return date_end
+    elif month == '04' or month == '06' or month == '09' or month == '11':
+        date_end = '30'
+        return date_end
+    else:
+        return date_end
+
+
 def get_timestamp_now():
     """ Get current date time - format timestamp
         ex: 12343545
