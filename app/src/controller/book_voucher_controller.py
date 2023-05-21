@@ -112,7 +112,7 @@ def delete_voucher(request: Request, voucher_id: str):
                                 message=f"Delete book error. - Caused by: [{error_message}]")
 
 
-@router.get(path="/voucher-thongke1", response_description="Get list voucher")
+@router.get(path="/chart", response_description="Get list voucher")
 def get_list_voucher_for_thong_ke(request: Request, month: str, year: str):
     try:
         response = voucher_service.get_list_voucher_for_thong_ke_1_month(month=month, year=year)

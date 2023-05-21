@@ -21,38 +21,54 @@ class BookRepository(MongoBaseRepo):
                            order: int,
                            filter_condition: dict):
         try:
-            # init data
-            total = 0
-            total_page = 0
-            skip = (page - 1) * size
-            # build filter condition
-            # Get list ocr_engine by condition
-            filter_condition.update(self._record_status_active)
+            if size > 0:
+                skip = (page - 1) * size
+                # build filter condition
+                # Get list ocr_engine by condition
+                filter_condition.update(self._record_status_active)
 
-            list_book_result_dict = list(
-                self.book_collection.find(filter_condition).sort([(order_by, order)]).skip(skip).limit(size))
-            if collection_utils.list_none_or_empty(list_book_result_dict):
-                list_book = []
+                list_book_result_dict = list(
+                    self.book_collection.find(filter_condition).sort([(order_by, order)]).skip(skip).limit(size))
+                if collection_utils.list_none_or_empty(list_book_result_dict):
+                    list_book = []
+                else:
+                    list_book = [self._dict_to_list_book_result(book) for book in
+                                 list_book_result_dict]
+
+                # count total
+                total = self.book_collection.count_documents(filter_condition)
+                # calculate total page
+                if not total or total == 0:
+                    total_page = 0
+                else:
+                    total_page = ((total + size - 1) // size)
+                result_pagnition = base_model.coor_response(response_data=list_book,
+                                                            page=page,
+                                                            limit=size,
+                                                            sort_by=order_by,
+                                                            sort=order,
+                                                            total_records=total,
+                                                            total_page=total_page)
+
+                return result_pagnition
             else:
-                list_book = [self._dict_to_list_book_result(book) for book in
-                             list_book_result_dict]
+                filter_condition.update(self._record_status_active)
 
-            # count total
-            total = self.book_collection.count_documents(filter_condition)
-            # calculate total page
-            if not total or total == 0:
-                total_page = 0
-            else:
-                total_page = ((total + size - 1) // size)
-            result_pagnition = base_model.coor_response(response_data=list_book,
-                                                        page=page,
-                                                        limit=size,
-                                                        sort_by=order_by,
-                                                        sort=order,
-                                                        total_records=total,
-                                                        total_page=total_page)
-
-            return result_pagnition
+                list_book_result_dict = list(
+                    self.book_collection.find(filter_condition).sort([(order_by, order)]))
+                if collection_utils.list_none_or_empty(list_book_result_dict):
+                    list_book = []
+                else:
+                    list_book = [self._dict_to_list_book_result(book) for book in
+                                 list_book_result_dict]
+                result_pagnition = base_model.coor_response(response_data=list_book,
+                                                            page=page,
+                                                            limit=0,
+                                                            sort_by=order_by,
+                                                            sort=order,
+                                                            total_records=len(list_book),
+                                                            total_page=1)
+                return result_pagnition
         except Exception as e:
             logging.error(f"Get List Book error -- Caused by '{e.__str__()}")
             return None

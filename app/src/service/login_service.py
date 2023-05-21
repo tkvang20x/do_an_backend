@@ -35,7 +35,7 @@ class LoginService(metaclass=Singleton):
         self.manager_repo = ManagerRepository()
 
     def login_user(self, data_login: LoginRequest):
-        check_username = self.user_repo.check_user_name_user(user_name=data_login.username)
+        check_username = self.user_repo.check_exist_value_in_db(field="user_name",value=data_login.username)
 
         if not check_username:
             raise BusinessException(message=f'User name not exist!',

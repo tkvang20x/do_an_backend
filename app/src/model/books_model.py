@@ -10,7 +10,6 @@ from app.src.model.group_books_model import GroupBooks
 
 class DetailBooks(CustomBaseModel):
     id: Optional[str] = None
-    parent_id: Optional[str] = None
     name: Optional[str] = None
     code: Optional[str] = None
     description: Optional[str] = None
@@ -24,6 +23,7 @@ class DetailBooks(CustomBaseModel):
     total_ready: Optional[int] = 0
     group_code: Optional[str] = None
     groups: Optional[GroupBooks] = None
+    cabinet: Optional[int] = 0
 
 
 class ListBook(CustomBaseModel):
@@ -48,6 +48,7 @@ class CreateDataBook(CustomBaseModel):
     origin: Optional[str] = None
     group_code: Optional[str] = None
     amount: Optional[int] = None
+    cabinet: Optional[int] = 0
 
     @classmethod
     def __get_validators__(cls):
@@ -69,6 +70,7 @@ class UpdateBookData(BaseModel):
     publishing_year: Optional[str] = None
     origin: Optional[str] = None
     group_code: Optional[str] = None
+    cabinet: Optional[int] = 0
 
     @classmethod
     def __get_validators__(cls):
@@ -91,10 +93,10 @@ class UpdateBookDataFormService(BaseModel):
     origin: Optional[str] = None
     group_code: Optional[str] = None
     avatar: Optional[str] = None
+    cabinet: Optional[int] = 0
 
 
 class BooksFormInDB(CustomBaseModel):
-    parent_id: Optional[str] = None
     name: Optional[str] = None
     code: Optional[str] = None
     description: Optional[str] = None
@@ -106,3 +108,4 @@ class BooksFormInDB(CustomBaseModel):
     avatar: Optional[str] = None
     group_code: Optional[str] = None
     total_books_ready:Optional[str] = None
+    cabinet: Optional[int] = 0

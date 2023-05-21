@@ -1,3 +1,4 @@
+import base64
 import types
 
 from fastapi import UploadFile, File
@@ -64,6 +65,8 @@ class UserService(metaclass=Singleton):
         data_create.modified_time = datetime_utils.get_string_datetime_now()
         data_create.created_time = datetime_utils.get_string_datetime_now()
         data_create.created_by = user
+        data_create.password = base64.b64encode(bytes(data_create.password, 'utf-8')).decode('utf-8')
+
         # data_create.code = "USER_" + str(datetime_utils.get_timestamp_now())
         create_user_result = self.user_repo.create_user_repo(data_create=data_create)
         if not create_user_result:

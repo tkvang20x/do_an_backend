@@ -8,7 +8,7 @@ from starlette.staticfiles import StaticFiles
 from app.src.base.base_api import app
 from app.src.base.base_model import ResponseCommon
 from app.src.base.base_service import BaseRoute
-from app.src.model.book_model import CreateBook, UpdateBook
+from app.src.model.book_model import CreateBook, UpdateBook, CreateBookWithAmount
 from app.src.base.base_exception import gen_exception_service, BusinessException
 from app.src.service.book_service import BookService
 from app.src.ultities.token_utils import validate_token
@@ -71,9 +71,9 @@ def get_list_id_book(request: Request,
 
 
 @router.post(path="/book/create", response_description="Create new book")
-def create_book(request: Request, code_books: str, amount: int):
+def create_book(request: Request, data_create: CreateBookWithAmount):
     try:
-        response = book_service.create_book_by_code_service(code_books=code_books, amount=amount, path_folder=BASEDIR)
+        response = book_service.create_book_by_code_service(code_books=data_create.code_books, amount=data_create.amount,compartment=data_create.compartment ,path_folder=BASEDIR)
         return ResponseCommon().success(result=response, status=status.HTTP_201_CREATED, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)

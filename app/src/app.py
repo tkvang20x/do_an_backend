@@ -86,7 +86,6 @@ def job_function():
 
 async def run_jobs():
     schedule.every().day.at("00:00:01").do(job_function)
-    # job_function()
     while True:
         schedule.run_pending()
         await asyncio.sleep(1)

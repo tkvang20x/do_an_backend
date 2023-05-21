@@ -80,13 +80,19 @@ class BookService(metaclass=Singleton):
             raise BusinessException(message=error_message, http_code=http_status)
 
     @types.coroutine
-    def create_book_by_code_service(self, code_books: str, amount: int, path_folder: str):
+    def create_book_by_code_service(self, code_books: str, amount: int, compartment: int,path_folder: str):
         try:
             check_books = self.books_reposiroty.get_detail_book_repo(code=code_books)
             if check_books is None:
                 raise BusinessException(message=f"Books {code_books} not found. - Caused by: [book_service]")
             if amount == 0 or amount is None:
                 raise BusinessException(message=f"Amount book must have > 0. - Caused by: [book_service]")
+
+            if check_books.total_books > 0:
+                serial_book = check_books.total_books + 1
+            else:
+                serial_book = 1
+
             for i in range(amount):
                 time.sleep(0.000001)
                 data_create = DetailBook()
@@ -96,6 +102,8 @@ class BookService(metaclass=Singleton):
                 data_create.code_books = code_books
                 data_create.status_book = const_utils.StatusBook.NEW.value
                 data_create.status_borrow = const_utils.StatusBorrow.READY.value
+                data_create.serial = serial_book
+                data_create.compartment = compartment
 
                 img_qrcode = qrcode.make(data_create.code_id)
                 img_qrcode.save(f'{path_folder}\qrcode\{data_create.code_id}.png')
@@ -103,6 +111,7 @@ class BookService(metaclass=Singleton):
                 create_book_result = self.book_repo.create_book_repo(data=data_create)
                 if not create_book_result:
                     raise RuntimeError(f'Create new book error!')
+                serial_book = serial_book + 1
             return True
         except Exception as ex:
             http_status, error_message = gen_exception_service(ex)

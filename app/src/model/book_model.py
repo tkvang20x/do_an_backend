@@ -1,5 +1,7 @@
 from typing import Optional
 
+from pydantic import BaseModel
+
 from app.src.model.base.base_model import CustomBaseModel
 from app.src.model.books_model import DetailBooks, BooksFormInDB
 from app.src.model.group_books_model import GroupBooks
@@ -12,6 +14,8 @@ class ListBook(CustomBaseModel):
     status_borrow: Optional[str] = None
     user_borrow: Optional[str] = None
     qr_code_data: Optional[str] = None
+    serial: Optional[int] = 0
+    compartment: Optional[int] = 0
 
 
 class CreateBook(CustomBaseModel):
@@ -19,6 +23,8 @@ class CreateBook(CustomBaseModel):
     code_books: Optional[str] = None
     status_book: Optional[str] = None
     qr_code_data: Optional[str] = None
+    serial: Optional[int] = 0
+    compartment: Optional[int] = 0
 
 
 class DetailBook(CustomBaseModel):
@@ -31,9 +37,17 @@ class DetailBook(CustomBaseModel):
     user_borrow: Optional[str] = None
     qr_code_data: Optional[str] = None
     groups: Optional[GroupBooks] = None
+    serial: Optional[int] = 0
+    compartment: Optional[int] = 0
 
 
 class UpdateBook(CustomBaseModel):
     # status_book: Optional[str] = None
     status_borrow: Optional[str] = None
     user_borrow: Optional[str] = None
+
+
+class CreateBookWithAmount(BaseModel):
+    code_books: Optional[str] = None
+    amount: Optional[int] = 0
+    compartment: Optional[int] = 0

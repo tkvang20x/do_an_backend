@@ -1,3 +1,4 @@
+import base64
 import types
 
 from fastapi import UploadFile, File
@@ -49,6 +50,7 @@ class ManagerService(metaclass=Singleton):
         data_create.created_time = datetime_utils.get_string_datetime_now()
         data_create.created_by = user
         data_create.code = "MANAGER_" + str(datetime_utils.get_timestamp_now())
+        data_create.password = base64.b64encode(bytes(data_create.password, 'utf-8')).decode('utf-8')
 
         if avatar is not None:
             path_avatar = yield from image_utils.create_upload_file(path_folder, avatar)

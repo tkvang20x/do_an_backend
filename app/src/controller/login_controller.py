@@ -21,7 +21,7 @@ def login(request: Request, login: LoginRequest):
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)
-        raise BusinessException(http_code=http_status,
+        return BusinessException(http_code=http_status,
                                 path=request.url.path,
                                 message=f"LOGIN FAIL- {error_message}")
 
@@ -33,6 +33,6 @@ def login(request: Request, login: LoginRequest):
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)
-        raise BusinessException(http_code=http_status,
+        return BusinessException(http_code=http_status,
                                 path=request.url.path,
                                 message=f"LOGIN FAIL- {error_message}!")
