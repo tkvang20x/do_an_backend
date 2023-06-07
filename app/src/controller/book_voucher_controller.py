@@ -30,7 +30,8 @@ def get_list_voucher_by_user_id(request: Request,
                                 user_name: str = None,
                                 status_voucher: str = None,
                                 start_date: str = None,
-                                due_date: str = None):
+                                due_date: str = None,
+                                manager_name:str = None):
     try:
         response = voucher_service.get_list_voucher_by_user_id(user_id=user_id,
                                                                page=page,
@@ -41,7 +42,8 @@ def get_list_voucher_by_user_id(request: Request,
                                                                user_name=user_name,
                                                                start_date=start_date,
                                                                due_date=due_date,
-                                                               status_voucher=status_voucher)
+                                                               status_voucher=status_voucher,
+                                                               manager_name=manager_name)
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)
@@ -53,7 +55,7 @@ def get_list_voucher_by_user_id(request: Request,
 @router.post(path="/voucher", response_description="Create new voucher")
 def create_voucher(request: Request, data_create: VoucherCreate, user=Depends(validate_token)):
     try:
-        response = voucher_service.create_voucher_service(data_create=data_create, user=user.get('code'))
+        response = voucher_service.create_voucher_service(data_create=data_create, user=user.get('user_name'))
         return ResponseCommon().success(result=response, status=status.HTTP_201_CREATED, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)
@@ -88,10 +90,11 @@ def update_voucher(request: Request, voucher_id: str, data_update: VoucherUpdate
 
 
 @router.put(path="/voucher/{voucher_id}/status", response_description="Update status voucher")
-def update_status_voucher(request: Request, voucher_id: str, status_update: StatusVoucherUpdate):
+def update_status_voucher(request: Request, voucher_id: str, status_update: StatusVoucherUpdate, manager=Depends(validate_token)):
     try:
         response = voucher_service.update_status_voucher_service(voucher_id=voucher_id,
-                                                                 status_voucher=status_update.status_update)
+                                                                 status_voucher=status_update.status_update,
+                                                                 manager=manager.get('username'))
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)

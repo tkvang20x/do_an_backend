@@ -8,7 +8,7 @@ from starlette.staticfiles import StaticFiles
 from app.src.base.base_api import app
 from app.src.base.base_model import ResponseCommon
 from app.src.base.base_service import BaseRoute
-from app.src.model.book_model import CreateBook, UpdateBook, CreateBookWithAmount
+from app.src.model.book_model import CreateBook, UpdateBook, CreateBookWithAmount, UpdateUserBook
 from app.src.base.base_exception import gen_exception_service, BusinessException
 from app.src.service.book_service import BookService
 from app.src.ultities.token_utils import validate_token
@@ -28,8 +28,8 @@ def get_list_book(request: Request,
                   code_books: str,
                   page: int = 1,
                   size: int = 10,
-                  order_by: str = Query(default="modified_time",
-                                        enum=["modified_time", "created_time"]),
+                  order_by: str = Query(default="serial",
+                                        enum=["modified_time", "created_time", "serial"]),
                   order: int = Query(default=-1, enum=[-1, 1]),
                   code_id: str = None,
                   status_book: str = None,
@@ -116,3 +116,15 @@ def delete_book(request: Request, code_id: str):
         raise BusinessException(http_code=http_status,
                                 path=request.url.path,
                                 message=f"Delete book error. - Caused by: [{error_message}]")
+
+
+@router.put(path="/user-borrow/{code_id}", response_description="Update user borrow book")
+def update_book(request: Request, code_id: str, data_update: UpdateUserBook):
+    try:
+        response = book_service.update_user_book_service(code_id=code_id, data_update=data_update)
+        return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
+    except Exception as ex:
+        http_status, error_message = gen_exception_service(ex)
+        raise BusinessException(http_code=http_status,
+                                path=request.url.path,
+                                message=f"Update book error. - Caused by: [{error_message}]")

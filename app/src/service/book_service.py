@@ -4,7 +4,7 @@ from starlette import status
 
 from app.src.base.base_exception import BusinessException, gen_exception_service
 from app.src.base.base_service import Singleton
-from app.src.model.book_model import CreateBook, DetailBook, UpdateBook
+from app.src.model.book_model import CreateBook, DetailBook, UpdateBook, UpdateUserBook
 from app.src.repository.book_repository import BookRepository
 from app.src.repository.books_repository import BooksRepository
 from app.src.ultities import string_utils, mongo_utils, datetime_utils, const_utils, image_utils
@@ -55,9 +55,9 @@ class BookService(metaclass=Singleton):
         return filter_condition
 
     @types.coroutine
-    def create_book_service(self, code_books: str, path_folder: str):
+    def create_book_service(self, code_books: str, path_folder: str, index: int):
         try:
-            # time.sleep(0.0001)
+            time.sleep(0.00000001)
             data_create = DetailBook()
             data_create.modified_time = datetime_utils.get_string_datetime_now()
             data_create.created_time = datetime_utils.get_string_datetime_now()
@@ -65,7 +65,7 @@ class BookService(metaclass=Singleton):
             data_create.code_books = code_books
             data_create.status_book = const_utils.StatusBook.NEW.value
             data_create.status_borrow = const_utils.StatusBorrow.READY.value
-
+            data_create.serial = index
             img_qrcode = qrcode.make(data_create.code_id)
             img_qrcode.save(f'{path_folder}\qrcode\{data_create.code_id}.png')
             data_create.qr_code_data = f'\qrcode\{data_create.code_id}.png'
@@ -173,3 +173,12 @@ class BookService(metaclass=Singleton):
         if status_borrow is not None and len(status_borrow.strip()) > 0:
             filter_condition.update({'status_borrow': mongo_utils.build_filter_like_keyword(status_borrow.strip())})
         return filter_condition
+
+    def update_user_book_service(self, code_id: str, data_update:UpdateUserBook):
+        try:
+            self.get_detail_book_service(code_id=code_id.strip())
+            update_data = self.book_repo.update_user_book_repo(code_id=code_id, data_update=data_update)
+            return update_data
+        except Exception as e:
+            http_status, error_message = gen_exception_service(e)
+            raise BusinessException(message=error_message, http_code=http_status)

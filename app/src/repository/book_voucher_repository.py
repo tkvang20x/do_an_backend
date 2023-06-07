@@ -164,13 +164,14 @@ class BookVoucherRepository(MongoBaseRepo):
             return True
         return False
 
-    def update_status_voucher_repo(self, voucher_id: str, status_update: str):
+    def update_status_voucher_repo(self, voucher_id: str, status_update: str, manager: str):
         modified_time = datetime_utils.get_string_datetime_now()
         voucher_id = voucher_id.strip()
         _update_result = self.voucher_collection.update_one({'voucher_id': voucher_id},
                                                             {'$set': {
                                                                 'modified_time': modified_time,
-                                                                'status_voucher': status_update
+                                                                'status_voucher': status_update,
+                                                                'manager_name': manager
                                                             }})
         if _update_result and _update_result.modified_count == 1:
             book_result_dict = self.get_detail_voucher_repo(voucher_id=voucher_id)

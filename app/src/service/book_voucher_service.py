@@ -35,14 +35,19 @@ class BookVoucherService(metaclass=Singleton):
             # self.user_repo.get_detail_user_repo(code=data_create_convert.user_id)
 
             for book in data_create_convert.books_borrowed:
-                self.book_repo.get_detail_book_repo(code_id=book)
+                # self.book_repo.get_detail_book_repo(code_id=book)
+                dict_update = {
+                    'status_borrow': const_utils.StatusBorrow.WAITING.value,
+                    'user_borrow': user
+                }
+                self.book_repo.update_book_repo(code_id=book, data_update=UpdateBook(**dict_update))
 
             data_create_convert.start_date = datetime_utils.get_string_datetime_now()
             data_create_convert.voucher_id = 'VOUCHER_' + str(datetime_utils.get_milisecond_time())
             data_create_convert.status_voucher = const_utils.StatusVoucher.WAITING_CONFIRM.value
             data_create_convert.modified_time = datetime_utils.get_string_datetime_now()
 
-            user_result = self.user_repo.check_exist_value_in_db(field="code",value=data_create_convert.user_id)
+            user_result = self.user_repo.check_exist_value_in_db(field="code", value=data_create_convert.user_id)
             # manager_result = self.manager_repo.get_detail_manager_repo(code=user)
 
             data_create_convert.user_name = user_result.user_name
@@ -73,11 +78,13 @@ class BookVoucherService(metaclass=Singleton):
                                     order: int,
                                     start_date: str,
                                     due_date: str,
-                                    status_voucher: str):
+                                    status_voucher: str,
+                                    manager_name: str):
         try:
             filter_condition = self.build_filter_condition(user_id=user_id, voucher_id=voucher_id,
                                                            start_date=start_date, due_date=due_date,
-                                                           status_voucher=status_voucher, user_name=user_name)
+                                                           status_voucher=status_voucher, user_name=user_name,
+                                                           manager_name=manager_name)
             list_book = self.voucher_repo.get_list_voucher_by_user_id_repo(
                 page=page,
                 size=size,
@@ -90,7 +97,7 @@ class BookVoucherService(metaclass=Singleton):
             raise BusinessException(message=error_message, http_code=http_status)
 
     def build_filter_condition(self, user_id: str, voucher_id: str, start_date: str, due_date: str, status_voucher: str,
-                               user_name: str):
+                               user_name: str, manager_name: str):
         filter_condition = {}
         if not string_utils.string_none_or_empty(user_id):
             filter_condition.update({'user_id': mongo_utils.build_filter_like_keyword(user_id.strip())})
@@ -103,7 +110,8 @@ class BookVoucherService(metaclass=Singleton):
             filter_condition.update({'user_name': mongo_utils.build_filter_like_keyword(user_name.strip())})
         if not string_utils.string_none_or_empty(status_voucher):
             filter_condition.update({'status_voucher': status_voucher})
-
+        if not string_utils.string_none_or_empty(manager_name):
+            filter_condition.update({'manager_name': mongo_utils.build_filter_like_keyword(manager_name.strip())})
         return filter_condition
 
     def get_detail_voucher_service(self, voucher_id: str):
@@ -147,12 +155,32 @@ class BookVoucherService(metaclass=Singleton):
             http_status, error_message = gen_exception_service(e)
             raise BusinessException(message=error_message, http_code=http_status)
 
-    def update_status_voucher_service(self, voucher_id: str, status_voucher: str):
+    def update_status_voucher_service(self, voucher_id: str, status_voucher: str, manager: str):
         status_update = ""
         try:
             voucher_detail = self.get_detail_voucher_service(voucher_id=voucher_id.strip())
+            list_book = voucher_detail.books_borrowed
             if status_voucher == StatusVoucher.CANCELLED.value:
                 status_update = StatusVoucher.CANCELLED.value
+                for book in list_book:
+                    dict_update = {
+                        'status_borrow': const_utils.StatusBorrow.READY.value,
+                        'user_borrow': "",
+                        'status_book': book.status_book,
+                        'compartment': book.compartment
+                    }
+                    self.book_repo.update_book_repo(code_id=book.code_id, data_update=UpdateBook(**dict_update))
+
+            elif voucher_detail.status_voucher == StatusVoucher.CONFIRMED.value:
+                status_update = StatusVoucher.PAYED.value
+                for book in list_book:
+                    dict_update = {
+                        'status_borrow': const_utils.StatusBorrow.READY.value,
+                        'user_borrow': "",
+                        'status_book': book.status_book,
+                        'compartment': book.compartment
+                    }
+                    self.book_repo.update_book_repo(code_id=book.code_id, data_update=UpdateBook(**dict_update))
             else:
                 if voucher_detail.status_voucher == StatusVoucher.WAITING_CONFIRM.value:
                     status_update = StatusVoucher.CONFIRMED.value
@@ -162,8 +190,17 @@ class BookVoucherService(metaclass=Singleton):
                     status_update = StatusVoucher.PAYED.value
                 elif voucher_detail.status_voucher == StatusVoucher.PAYED.value:
                     status_update = StatusVoucher.PAYED.value
+
+                for book in list_book:
+                    dict_update = {
+                        'status_borrow': const_utils.StatusBorrow.BORROWING.value,
+                        'user_borrow': book.user_borrow,
+                        'status_book': book.status_book,
+                        'compartment': book.compartment
+                    }
+                    self.book_repo.update_book_repo(code_id=book.code_id, data_update=UpdateBook(**dict_update))
             update_data = self.voucher_repo.update_status_voucher_repo(voucher_id=voucher_id,
-                                                                       status_update=status_update)
+                                                                       status_update=status_update, manager=manager)
             return update_data
         except Exception as e:
             http_status, error_message = gen_exception_service(e)
@@ -181,7 +218,17 @@ class BookVoucherService(metaclass=Singleton):
                                                                           filter_condition=filter_date)
         for item in list_voucher:
             self.voucher_repo.update_status_voucher_repo(voucher_id=item.voucher_id,
-                                                         status_update=const_utils.StatusVoucher.EXPIRED.value)
+                                                         status_update=const_utils.StatusVoucher.EXPIRED.value,
+                                                         manager=item.manager_name)
+
+        filter_book_expired = {
+            'status_voucher': const_utils.StatusVoucher.EXPIRED.value
+        }
+        list_voucher_expired = self.voucher_repo.get_list_voucher_by_user_id_repo(page=1, size=0,
+                                                                                  order_by="created_time",
+                                                                                  order=-1,
+                                                                                  filter_condition=filter_book_expired)
+        for item in list_voucher_expired:
             self.change_pass_service.send_email_message_expired(email=item.email_user, voucher_id=item.voucher_id)
 
     def get_list_voucher_for_thong_ke_1_month(self, month: str, year: str):
@@ -203,7 +250,9 @@ class BookVoucherService(metaclass=Singleton):
             filter_condition.update({"created_time": {"$gte": f'{year}-{month}-01-00:00:00',
                                                       "$lt": f'{year}-{month}-{date_end}-23:59:59'}})
 
-            list_voucher = self.voucher_repo.get_list_voucher_by_user_id_repo(page=1,size=0,order_by='created_time',order=-1,filter_condition=filter_condition)
+            list_voucher = self.voucher_repo.get_list_voucher_by_user_id_repo(page=1, size=0, order_by='created_time',
+                                                                              order=-1,
+                                                                              filter_condition=filter_condition)
 
             list_books_count = []
 
@@ -219,12 +268,14 @@ class BookVoucherService(metaclass=Singleton):
                             'code_books': book.code_books,
                             'name': book.books.name,
                             'author': book.books.author,
+                            'avatar': book.books.avatar,
                             'count': 1
                         })
                     else:
                         for books in list_books_count:
                             if books.get('code_books') == book.code_books:
                                 books.update({'count': books.get('count') + 1})
+            new_list_sort = sorted(list_books_count, key=lambda i: i['count'], reverse=True)
 
             total_voucher, total_waiting, total_confirm, total_payed, total_expired, total_cancel = self.voucher_repo.get_list_voucher_for_thong_ke_1_month(
                 filter_condition=filter_condition)
@@ -235,7 +286,7 @@ class BookVoucherService(metaclass=Singleton):
                     "total_payed": total_payed,
                     "total_expired": total_expired,
                     "total_cancel": total_cancel,
-                    "list_books_count": list_books_count
+                    "list_books_count": new_list_sort
                     }
 
         except Exception as ex:

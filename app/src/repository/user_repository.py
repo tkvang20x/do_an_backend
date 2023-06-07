@@ -89,13 +89,13 @@ class UserRepository(MongoBaseRepo):
         user_result_dict = self._dict_to_create_user_result(user_result)
         return user_result_dict
 
-    # def get_detail_user_repo(self, code: str):
-    #     code = code.strip()
-    #     user_result = self.user_collection.find_one({"code": code, 'is_active': True})
-    #     if not user_result:
-    #         return None
-    #     user_result_dict = self._dict_to_create_user_result(user_result)
-    #     return user_result_dict
+    def get_detail_user_repo(self, code: str):
+        code = code.strip()
+        user_result = self.user_collection.find_one({"code": code, 'is_active': True})
+        if not user_result:
+            return None
+        user_result_dict = self._dict_to_create_user_result(user_result)
+        return user_result_dict
 
     # def check_user_name_user(self, user_name: str):
     #     user_name = user_name.strip()
@@ -112,8 +112,8 @@ class UserRepository(MongoBaseRepo):
         _update_result = self.user_collection.update_one({'code': code},
                                                          {'$set': data_update})
         if _update_result and _update_result.modified_count == 1:
-            book_result_dict = self.get_detail_user_repo(code=code)
-            return book_result_dict
+            user_result_dict = self.get_detail_user_repo(code=code)
+            return user_result_dict
         return None
 
     def delete_user_repo(self, code: str):

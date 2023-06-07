@@ -67,6 +67,7 @@ class ResponseCommon:
 
     def success(self, result,
                 status: str,
+                message: str = "OK",
                 path: str = None):
         # if  result response is None -> default value
         if result is None:
@@ -78,7 +79,7 @@ class ResponseCommon:
         # if not result.get('result') and not result.get('result') == []:
         self.common_message['data'] = result
         self.common_message['status'] = status
-        self.common_message['error'] = "OK"
+        self.common_message['error'] = message
         self.common_message['path'] = path
         return self.common_message
 

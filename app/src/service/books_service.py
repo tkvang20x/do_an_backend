@@ -39,7 +39,7 @@ class BooksService(metaclass=Singleton):
 
             if amount > 0:
                 for i in range(amount):
-                    self.book_repo.create_book_service(code_books=data_create.code, path_folder=path_folder)
+                    self.book_repo.create_book_service(code_books=data_create.code, path_folder=path_folder, index=i)
 
             return create_book_result
         except Exception as ex:

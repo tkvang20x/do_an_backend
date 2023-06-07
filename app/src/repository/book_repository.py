@@ -2,7 +2,7 @@ import logging
 
 from app.src.base.base_repository import MongoBaseRepo
 from app.src.model.base import base_model
-from app.src.model.book_model import DetailBook, ListBook, UpdateBook
+from app.src.model.book_model import DetailBook, ListBook, UpdateBook, UpdateUserBook
 from app.src.ultities import collection_utils, mongo_utils, datetime_utils
 
 BOOK_COLLECTION = "book"
@@ -155,7 +155,7 @@ class BookRepository(MongoBaseRepo):
     def update_book_repo(self, code_id: str, data_update: UpdateBook):
         data_update = data_update.dict()
         data_update['modified_time'] = datetime_utils.get_string_datetime_now()
-        code_id = code_id.strip()
+        # code_id = code_id.strip()
         _update_result = self.book_collection.update_one({'code_id': code_id},
                                                          {'$set': data_update})
         if _update_result and _update_result.modified_count == 1:
@@ -213,3 +213,13 @@ class BookRepository(MongoBaseRepo):
             'avatar': book.get('books')[0].get('avatar')
         }
         return convert_dict
+
+    def update_user_book_repo(self, code_id: str, data_update: UpdateUserBook):
+        data_update = data_update.dict()
+        data_update['modified_time'] = datetime_utils.get_string_datetime_now()
+        code_id = code_id.strip()
+        _update_result = self.book_collection.update_one({'code_id': code_id},
+                                                         {'$set': data_update})
+        if _update_result and _update_result.modified_count == 1:
+            return True
+        return False

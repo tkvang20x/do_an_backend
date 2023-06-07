@@ -18,10 +18,15 @@ login_service = LoginService()
 def login(request: Request, login: LoginRequest):
     try:
         response = login_service.login_user(data_login=login)
-        return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
+        if response == 1:
+            return ResponseCommon().success(result={"token": ""}, message="USERNAME NOT EXIST",status=status.HTTP_200_OK, path=request.url.path)
+        elif response == 2:
+            return ResponseCommon().success(result={"token": ""}, message="INVALID PASSWORD",status=status.HTTP_200_OK, path=request.url.path)
+        else:
+            return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)
-        return BusinessException(http_code=http_status,
+        raise BusinessException(http_code=http_status,
                                 path=request.url.path,
                                 message=f"LOGIN FAIL- {error_message}")
 

@@ -41,13 +41,18 @@ class DetailBook(CustomBaseModel):
     compartment: Optional[int] = 0
 
 
-class UpdateBook(CustomBaseModel):
-    # status_book: Optional[str] = None
+class UpdateBook(BaseModel):
+    status_book: Optional[str] = None
     status_borrow: Optional[str] = None
     user_borrow: Optional[str] = None
+    compartment: Optional[int] = 0
 
 
 class CreateBookWithAmount(BaseModel):
     code_books: Optional[str] = None
     amount: Optional[int] = 0
     compartment: Optional[int] = 0
+
+
+class UpdateUserBook(BaseModel):
+    user_borrow: Optional[str] = None

@@ -35,15 +35,13 @@ class LoginService(metaclass=Singleton):
         self.manager_repo = ManagerRepository()
 
     def login_user(self, data_login: LoginRequest):
-        check_username = self.user_repo.check_exist_value_in_db(field="user_name",value=data_login.username)
+        check_username = self.user_repo.check_exist_value_in_db(field="user_name", value=data_login.username)
 
         if not check_username:
-            raise BusinessException(message=f'User name not exist!',
-                                    http_code=status.HTTP_200_OK)
+            return 1
         password = base64.b64decode(check_username.password).decode('utf-8')
         if not data_login.password == password:
-            raise BusinessException(message=f'PASSWORD INCORRECT !!!',
-                                    http_code=status.HTTP_200_OK)
+            return 2
 
         response = generate_token(check_username.user_name, check_username.code, check_username.role)
         response = {

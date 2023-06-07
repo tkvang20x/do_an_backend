@@ -22,7 +22,7 @@ class ChangePasswordService(metaclass=Singleton):
             if len(new_pass.strip()) == 0:
                 raise BusinessException(message=f'Password must not blank!',
                                         http_code=status.HTTP_400_BAD_REQUEST)
-            if role == "USER":
+            if role == "STUDENT" or role == "TEACHER":
                 user_result = self.user_repo.check_exist_value_in_db(field="user_name", value=username.strip())
                 check_password = self.check_password(pass_input=old_pass,
                                                      old_pass=base64.b64decode(user_result.password).decode('utf-8'))
