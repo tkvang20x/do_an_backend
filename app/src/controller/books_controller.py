@@ -59,7 +59,7 @@ async def create_books(request: Request, data: CreateDataBook = Form(...),avatar
         if user.get('role') == 'USER':
             raise BusinessException(message=f'User not permission to access resource!',
                                     http_code=status.HTTP_403_FORBIDDEN)
-        response = await books_service.create_books_service(data_create=data,avatar=avatar, path_folder=BASEDIR)
+        response = await books_service.create_books_service(data_create=data,avatar=avatar, path_folder=BASEDIR,user=user.get('username'))
         return ResponseCommon().success(result=response, status=status.HTTP_201_CREATED, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)
@@ -69,7 +69,7 @@ async def create_books(request: Request, data: CreateDataBook = Form(...),avatar
 
 
 @router.get(path="/books/{code}", response_description="Get detail books")
-def get_detail_books(request: Request, code: str):
+def get_detail_books(request: Request, code: str, user=Depends(validate_token)):
     try:
         response = books_service.get_detail_books_service(code=code)
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
@@ -81,7 +81,7 @@ def get_detail_books(request: Request, code: str):
 
 
 @router.put(path="/books/{code}", response_description="Update books")
-async def update_books(request: Request, code: str, data_update: UpdateBookData = Form(...), avatar: UploadFile = File(None)):
+async def update_books(request: Request, code: str, data_update: UpdateBookData = Form(...), avatar: UploadFile = File(None),user=Depends(validate_token)):
     try:
         # if user.get('role') == 'USER':
         #     raise BusinessException(message=f'User not permission to access resource!',
@@ -96,7 +96,7 @@ async def update_books(request: Request, code: str, data_update: UpdateBookData 
 
 
 @router.delete(path="/books/{code}", response_description="Delete books")
-def delete_books(request: Request, code: str):
+def delete_books(request: Request, code: str, user=Depends(validate_token)):
     try:
         response = books_service.delete_books_service(code=code)
         return ResponseCommon().data(result=response, status=status.HTTP_204_NO_CONTENT, path=request.url.path)
@@ -108,7 +108,7 @@ def delete_books(request: Request, code: str):
 
 
 @router.put(path="/books/{code}/avatar", response_description="Update avatar books")
-async def update_books_avatar(request: Request, code: str, avatar: UploadFile = File(...)):
+async def update_books_avatar(request: Request, code: str, avatar: UploadFile = File(...), user=Depends(validate_token)):
     try:
         response = await books_service.update_avatar_books_service(code=code, avatar=avatar, path_folder=BASEDIR)
         return ResponseCommon().data(result=response, status=status.HTTP_200_OK, path=request.url.path)

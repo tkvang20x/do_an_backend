@@ -15,7 +15,7 @@ class ListBook(CustomBaseModel):
     user_borrow: Optional[str] = None
     qr_code_data: Optional[str] = None
     serial: Optional[int] = 0
-    compartment: Optional[int] = 0
+    compartment: Optional[int] = 1
 
 
 class CreateBook(CustomBaseModel):
@@ -24,7 +24,7 @@ class CreateBook(CustomBaseModel):
     status_book: Optional[str] = None
     qr_code_data: Optional[str] = None
     serial: Optional[int] = 0
-    compartment: Optional[int] = 0
+    compartment: Optional[int] = 1
 
 
 class DetailBook(CustomBaseModel):
@@ -38,20 +38,20 @@ class DetailBook(CustomBaseModel):
     qr_code_data: Optional[str] = None
     groups: Optional[GroupBooks] = None
     serial: Optional[int] = 0
-    compartment: Optional[int] = 0
+    compartment: Optional[int] = 1
 
 
 class UpdateBook(BaseModel):
     status_book: Optional[str] = None
     status_borrow: Optional[str] = None
     user_borrow: Optional[str] = None
-    compartment: Optional[int] = 0
+    compartment: Optional[int] = 1
 
 
 class CreateBookWithAmount(BaseModel):
     code_books: Optional[str] = None
     amount: Optional[int] = 0
-    compartment: Optional[int] = 0
+    compartment: Optional[int] = 1
 
 
 class UpdateUserBook(BaseModel):

@@ -61,9 +61,9 @@ class BookVoucherService(metaclass=Singleton):
             if not create_voucher_result:
                 raise RuntimeError(f'Create new voucher error!')
 
-            for book in data_create_convert.books_borrowed:
-                self.book_repo.update_book_repo(code_id=book, data_update=UpdateBook(status_borrow="BORROWING",
-                                                                                     user_borrow=user_result.user_name))
+            # for book in data_create_convert.books_borrowed:
+            #     self.book_repo.update_book_repo(code_id=book, data_update=UpdateBook(status_borrow="BORROWING",
+            #                                                                          user_borrow=user_result.user_name))
             return create_voucher_result
         except Exception as ex:
             http_status, error_message = gen_exception_service(ex)

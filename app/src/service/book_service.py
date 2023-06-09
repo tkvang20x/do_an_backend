@@ -47,15 +47,15 @@ class BookService(metaclass=Singleton):
         if code_id is not None and len(code_id.strip()) > 0:
             filter_condition.update({'code_id': mongo_utils.build_filter_like_keyword(code_id.strip())})
         if status_book is not None and len(status_book.strip()) > 0:
-            filter_condition.update({'status_book': mongo_utils.build_filter_like_keyword(status_book.strip())})
+            filter_condition.update({'status_book': status_book.strip()})
         if status_borrow is not None and len(status_borrow.strip()) > 0:
-            filter_condition.update({'status_borrow': mongo_utils.build_filter_like_keyword(status_borrow.strip())})
+            filter_condition.update({'status_borrow': status_borrow.strip()})
         if user_borrow is not None and len(user_borrow.strip()) > 0:
             filter_condition.update({'user_borrow': mongo_utils.build_filter_like_keyword(user_borrow.strip())})
         return filter_condition
 
     @types.coroutine
-    def create_book_service(self, code_books: str, path_folder: str, index: int):
+    def create_book_service(self, code_books: str, path_folder: str, index: int,compartment: int):
         try:
             time.sleep(0.00000001)
             data_create = DetailBook()
@@ -66,6 +66,7 @@ class BookService(metaclass=Singleton):
             data_create.status_book = const_utils.StatusBook.NEW.value
             data_create.status_borrow = const_utils.StatusBorrow.READY.value
             data_create.serial = index
+            data_create.compartment = compartment
             img_qrcode = qrcode.make(data_create.code_id)
             img_qrcode.save(f'{path_folder}\qrcode\{data_create.code_id}.png')
             data_create.qr_code_data = f'\qrcode\{data_create.code_id}.png'

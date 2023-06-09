@@ -36,6 +36,7 @@ class ListBook(CustomBaseModel):
     group_code: Optional[str] = None
     title: Optional[str] = None
     groups: Optional[GroupBooks] = None
+    cabinet: Optional[int] = 0
 
 
 class CreateDataBook(CustomBaseModel):
@@ -49,6 +50,7 @@ class CreateDataBook(CustomBaseModel):
     group_code: Optional[str] = None
     amount: Optional[int] = None
     cabinet: Optional[int] = 0
+    compartment: Optional[int] = 1
 
     @classmethod
     def __get_validators__(cls):

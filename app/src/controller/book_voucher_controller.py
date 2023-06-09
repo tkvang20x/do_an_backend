@@ -31,7 +31,8 @@ def get_list_voucher_by_user_id(request: Request,
                                 status_voucher: str = None,
                                 start_date: str = None,
                                 due_date: str = None,
-                                manager_name:str = None):
+                                manager_name:str = None,
+                                user=Depends(validate_token)):
     try:
         response = voucher_service.get_list_voucher_by_user_id(user_id=user_id,
                                                                page=page,
@@ -53,9 +54,9 @@ def get_list_voucher_by_user_id(request: Request,
 
 
 @router.post(path="/voucher", response_description="Create new voucher")
-def create_voucher(request: Request, data_create: VoucherCreate, user=Depends(validate_token)):
+def create_voucher(request: Request, data_create: VoucherCreate, manager=Depends(validate_token)):
     try:
-        response = voucher_service.create_voucher_service(data_create=data_create, user=user.get('user_name'))
+        response = voucher_service.create_voucher_service(data_create=data_create, user=manager.get('username'))
         return ResponseCommon().success(result=response, status=status.HTTP_201_CREATED, path=request.url.path)
     except Exception as ex:
         http_status, error_message = gen_exception_service(ex)
@@ -65,7 +66,7 @@ def create_voucher(request: Request, data_create: VoucherCreate, user=Depends(va
 
 
 @router.get(path="/voucher/{voucher_id}", response_description="Get detail voucher by code id")
-def get_detail_voucher(request: Request, voucher_id: str):
+def get_detail_voucher(request: Request, voucher_id: str, manager=Depends(validate_token)):
     try:
         response = voucher_service.get_detail_voucher_service(voucher_id=voucher_id)
         return ResponseCommon().success(result=response, status=status.HTTP_200_OK, path=request.url.path)
